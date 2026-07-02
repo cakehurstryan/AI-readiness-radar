@@ -48,3 +48,7 @@ This sits underneath frameworks like DORA, TMMi, or Team Topologies —
 it's a conversation starter, not a replacement for them.
 
 Framework by Callum Akehurst-Ryan · [cakehurstryan.com](https://cakehurstryan.com)
+
+## License
+
+MIT © 2026 Callum Akehurst-Ryan — see [LICENSE](LICENSE).
