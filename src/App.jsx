@@ -214,7 +214,7 @@ export default function App() {
                           dominantBaseline="middle"
                           fill="#F693BF"
                           fontSize={11}
-                          fontFamily="IBM Plex Mono"
+                          fontFamily="Arial, Helvetica, sans-serif"
                         >
                           {words.map((word, i) => (
                             <tspan key={i} x={ox} dy={i === 0 ? startDy : lineHeight}>
