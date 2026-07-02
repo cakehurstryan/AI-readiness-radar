@@ -8,6 +8,8 @@ before you hand out agents.
 Score your team across five signals, see the results on a radar chart,
 and compare against common team archetypes.
 
+![AI Readiness Radar screenshot](docs/screenshot.png)
+
 ## Signals
 
 - **Context & understanding** — does the team know what "good enough" means?
