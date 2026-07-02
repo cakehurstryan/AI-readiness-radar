@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 
 const SIGNALS = [
@@ -121,16 +121,46 @@ function overallBand(avg) {
   };
 }
 
+const STORAGE_KEY = "ai-readiness-radar:scores";
+
+const DEFAULT_SCORES = {
+  standards: 2,
+  feedback: 2,
+  reviews: 2,
+  ownership: 2,
+  context: 2,
+};
+
+function loadStoredScores() {
+  if (typeof window === "undefined") return DEFAULT_SCORES;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_SCORES;
+    const parsed = JSON.parse(raw);
+    const isValid = SIGNALS.every((s) => Number.isInteger(parsed[s.key]) && parsed[s.key] >= 1 && parsed[s.key] <= 4);
+    return isValid ? parsed : DEFAULT_SCORES;
+  } catch {
+    return DEFAULT_SCORES;
+  }
+}
+
 export default function App() {
-  const [scores, setScores] = useState({
-    standards: 2,
-    feedback: 2,
-    reviews: 2,
-    ownership: 2,
-    context: 2,
-  });
+  const [scores, setScores] = useState(loadStoredScores);
   const [compareArchetype, setCompareArchetype] = useState(null);
   const [expanded, setExpanded] = useState(null);
+  const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+    setJustSaved(true);
+    const timer = setTimeout(() => setJustSaved(false), 1200);
+    return () => clearTimeout(timer);
+  }, [scores]);
+
+  const resetScores = () => {
+    setScores(DEFAULT_SCORES);
+    window.localStorage.removeItem(STORAGE_KEY);
+  };
 
   const chartData = useMemo(
     () =>
@@ -322,8 +352,34 @@ export default function App() {
 
         {/* Signal scoring */}
         <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="mono" style={{ fontSize: 12, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            Score each signal
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div className="mono" style={{ fontSize: 12, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              Score each signal
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span
+                className="mono"
+                style={{ fontSize: 11, color: "#E5FF3D", opacity: justSaved ? 1 : 0, transition: "opacity 0.3s ease" }}
+              >
+                Saved in this browser
+              </span>
+              <button
+                onClick={resetScores}
+                className="mono"
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 3,
+                  border: "1px solid #3A2530",
+                  background: "transparent",
+                  color: "#F693BF",
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                }}
+              >
+                Reset scores
+              </button>
+            </div>
           </div>
           {SIGNALS.map((s) => (
             <div
