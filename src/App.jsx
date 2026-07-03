@@ -177,11 +177,28 @@ function formatSessionDate(iso) {
 }
 
 export default function App() {
-  const [scores, setScores] = useState(loadStoredScores);
-  const [history, setHistory] = useState(loadStoredHistory);
+  // Start from defaults (matching what the server prerenders, since there's
+  // no localStorage at build time) and load any real saved data after mount.
+  // Reading localStorage synchronously during initial render would make the
+  // client's first paint diverge from the prerendered HTML and break hydration.
+  const [scores, setScores] = useState(DEFAULT_SCORES);
+  const [history, setHistory] = useState([]);
   const [compareWith, setCompareWith] = useState(null); // { kind: "archetype" | "session", key: string } | null
   const [expanded, setExpanded] = useState(null);
   const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    setScores(loadStoredScores());
+    setHistory(loadStoredHistory());
+  }, []);
+
+  // Recharts' ResponsiveContainer measures the DOM via ResizeObserver after
+  // mount, so it renders differently on the server (no layout) than on the
+  // client's first paint. Gating it behind a mount flag keeps the server
+  // markup and the client's initial render identical (an empty placeholder),
+  // so the chart only appears after hydration - never part of the diff.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
@@ -244,7 +261,11 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`}</style>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`,
+        }}
+      />
 
       {/* Site header — mirrors cakehurstryan.com */}
       <header style={{ padding: "20px max(24px, 4vw)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
@@ -288,6 +309,7 @@ export default function App() {
         >
           <div>
             <div style={{ height: 340 }}>
+              {mounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={chartData} outerRadius="58%" margin={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <PolarGrid stroke="#F693BF" strokeOpacity={0.35} />
@@ -360,6 +382,7 @@ export default function App() {
                   )}
                 </RadarChart>
               </ResponsiveContainer>
+              )}
             </div>
             <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
               <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
@@ -612,7 +635,7 @@ export default function App() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
                 <div>
-                  <h3 style={{ fontSize: "var(--fs-heading)", fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{s.short}</h3>
+                  <h2 style={{ fontSize: "var(--fs-heading)", fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{s.short}</h2>
                   <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5, textWrap: "pretty" }}>{s.question}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -743,7 +766,9 @@ export default function App() {
         </div>
       </footer>
 
-      <style>{`
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @media (max-width: 760px) {
           .radar-grid { grid-template-columns: 1fr !important; }
           .radar-grid > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid #3A2530; padding-top: 24px; margin-top: 8px; }
@@ -756,7 +781,9 @@ export default function App() {
           .score-header { flex-direction: column-reverse !important; align-items: flex-start !important; }
           .score-actions { align-self: flex-end !important; }
         }
-      `}</style>
+      `,
+        }}
+      />
     </div>
   );
 }
