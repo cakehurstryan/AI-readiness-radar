@@ -2,8 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  // Hosted on GitHub Pages as a project site, so assets resolve under
-  // the repo-name path: https://cakehurstryan.github.io/AI-readiness-radar/
-  base: "/AI-readiness-radar/",
+  // Served from the custom subdomain radar.cakehurstryan.com (root),
+  // so assets resolve from "/".
   plugins: [react()],
 });
