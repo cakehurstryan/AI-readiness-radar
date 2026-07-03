@@ -1,0 +1,69 @@
+- generic [ref=f4e2]:
+  - banner [ref=f4e3]:
+    - generic [ref=f4e6]:
+      - link "A Picture of Callum Akehurst-Ryan used as the site icon." [ref=f4e8] [cursor=pointer]:
+        - /url: https://cakehurstryan.com/
+        - img "A Picture of Callum Akehurst-Ryan used as the site icon." [ref=f4e9]
+      - navigation "Footer navigation" [ref=f4e10]:
+        - list [ref=f4e15]:
+          - listitem [ref=f4e16]:
+            - link "Home" [ref=f4e17] [cursor=pointer]:
+              - /url: https://cakehurstryan.com
+          - listitem [ref=f4e18]:
+            - link "About Me" [ref=f4e19] [cursor=pointer]:
+              - /url: https://cakehurstryan.com/about-me/
+          - listitem [ref=f4e20]:
+            - link "Blog Posts" [ref=f4e21] [cursor=pointer]:
+              - /url: https://cakehurstryan.com/blog-posts/
+          - listitem [ref=f4e22]:
+            - link "Talks" [ref=f4e23] [cursor=pointer]:
+              - /url: https://cakehurstryan.com/talks/
+          - listitem [ref=f4e24]:
+            - link "AI Readiness Radar" [ref=f4e25] [cursor=pointer]:
+              - /url: https://radar.cakehurstryan.com/
+  - generic [ref=f4e29]:
+    - generic [ref=f4e31]:
+      - paragraph [ref=f4e32]: Quality Engineer | Keynote Conference Speaker | AI Enabled Testing
+      - heading "Callum Akehurst-Ryan" [level=1] [ref=f4e33]
+      - paragraph [ref=f4e34]: Quality engineer and leader helping engineering orgs to adopt AI safely and ship faster with confidence, being hands on rather than from the sidelines. This is where I go deeper on the thinking behind that, sharing my blogs and talks on quality engineering, testing and using AI in product development.
+    - generic [ref=f4e35]:
+      - link "Learn More" [ref=f4e37] [cursor=pointer]:
+        - /url: https://cakehurstryan.com/about-me/
+      - link "Blog Posts" [ref=f4e39] [cursor=pointer]:
+        - /url: https://cakehurstryan.com/blog-posts/
+  - generic [ref=f4e41]:
+    - separator [ref=f4e42]
+    - generic [ref=f4e44]:
+      - generic [ref=f4e45]:
+        - heading "Callum Akehurst-Ryan" [level=3] [ref=f4e46]
+        - paragraph [ref=f4e47]: I think quality is something that the whole team owns… not a gate that one person stands in front of. I’m a Staff Quality Engineer who writes and speaks about testing, quality engineering and AI readiness (with the odd gaming analogy thrown in).
+        - paragraph [ref=f4e52]:
+          - button "Subscribe" [ref=f4e53] [cursor=pointer]
+        - paragraph [ref=f4e54]:
+          - emphasis [ref=f4e55]: © Callum Akehurst-Ryan 2026
+      - generic [ref=f4e56]:
+        - heading "Contact" [level=3] [ref=f4e57]
+        - generic [ref=f4e58]:
+          - link "Linkedin" [ref=f4e60] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/cakehurstryan/
+          - link "Email" [ref=f4e62] [cursor=pointer]:
+            - /url: mailto:cal@coada.org.uk
+      - generic [ref=f4e63]:
+        - heading "Pages" [level=3] [ref=f4e64]
+        - navigation "Footer navigation 2" [ref=f4e65]:
+          - list [ref=f4e66]:
+            - listitem [ref=f4e67]:
+              - link "Home" [ref=f4e68] [cursor=pointer]:
+                - /url: https://cakehurstryan.com
+            - listitem [ref=f4e69]:
+              - link "About Me" [ref=f4e70] [cursor=pointer]:
+                - /url: https://cakehurstryan.com/about-me/
+            - listitem [ref=f4e71]:
+              - link "Blog Posts" [ref=f4e72] [cursor=pointer]:
+                - /url: https://cakehurstryan.com/blog-posts/
+            - listitem [ref=f4e73]:
+              - link "Talks" [ref=f4e74] [cursor=pointer]:
+                - /url: https://cakehurstryan.com/talks/
+            - listitem [ref=f4e75]:
+              - link "AI Readiness Radar" [ref=f4e76] [cursor=pointer]:
+                - /url: https://radar.cakehurstryan.com/

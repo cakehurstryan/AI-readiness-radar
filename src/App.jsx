@@ -698,7 +698,7 @@ export default function App() {
       </main>
 
       {/* Site footer — mirrors cakehurstryan.com */}
-      <footer style={{ borderTop: "1px solid #3A2530", marginTop: 8 }}>
+      <footer style={{ borderTop: "3px solid #F693BF", marginTop: 8 }}>
         <div className="footer-grid" style={{ padding: "40px max(24px, 4vw) 56px", display: "grid", gridTemplateColumns: "1.5fr 0.8fr 0.8fr", gap: 24 }}>
           <div>
             <div style={{ color: "#F693BF", fontSize: 16, fontWeight: 600, textTransform: "uppercase" }}>
@@ -717,10 +717,10 @@ export default function App() {
             <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
               Contact
             </div>
-            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
               LinkedIn
             </a>
-            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
               Email
             </a>
           </div>
@@ -729,7 +729,7 @@ export default function App() {
               Pages
             </div>
             {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"], ["AI Readiness Radar", "https://radar.cakehurstryan.com/"]].map(([label, href]) => (
-              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
                 {label}
               </a>
             ))}
