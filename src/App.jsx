@@ -263,7 +263,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "'Montserrat', system-ui, sans-serif" }}>
       <style
         dangerouslySetInnerHTML={{
-          __html: `@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`,
+          __html: `:root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`,
         }}
       />
 
