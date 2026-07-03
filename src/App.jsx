@@ -609,8 +609,8 @@ export default function App() {
               {expanded === s.key && (
                 <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
                   {s.bands.map((bandText, i) => (
-                    <div key={i} style={{ display: "flex", gap: 10, fontSize: 13, color: "#F693BF", lineHeight: 1.5 }}>
-                      <span className="mono" style={{ color: "#F693BF", flexShrink: 0 }}>{i + 1} · {BAND_LABELS[i]}</span>
+                    <div key={i} className="band-desc-row" style={{ display: "flex", gap: 16, fontSize: 13, color: "#F693BF", lineHeight: 1.5 }}>
+                      <span className="mono" style={{ color: "#F693BF", flexShrink: 0, width: 230 }}>{i + 1} · {BAND_LABELS[i]}</span>
                       <span>{bandText}</span>
                     </div>
                   ))}
@@ -638,6 +638,8 @@ export default function App() {
         @media (max-width: 760px) {
           .radar-grid { grid-template-columns: 1fr !important; }
           .radar-grid > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid #3A2530; padding-top: 24px; margin-top: 8px; }
+          .band-desc-row { flex-direction: column !important; gap: 2px !important; }
+          .band-desc-row > span:first-child { width: auto !important; }
         }
       `}</style>
     </div>
