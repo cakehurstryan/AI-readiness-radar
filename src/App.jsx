@@ -116,7 +116,7 @@ function overallBand(avg) {
     };
   return {
     label: "High maturity",
-    color: "#E5FF3D",
+    color: "#F693BF",
     advice: "This is what an AI-ready team looks like. Keep reassessing periodically, gaps can creep back in.",
   };
 }
@@ -229,31 +229,31 @@ export default function App() {
   const avg = average(scores);
   const weak = weakestSignal(scores);
   const band = overallBand(avg);
-  const allHigh = Object.values(scores).every((v) => v >= 3);
+  const allMax = Object.values(scores).every((v) => v >= 4);
   const lastSession = history.length > 0 ? history[history.length - 1] : null;
   const overallTrend = lastSession ? avg - average(lastSession.scores) : null;
 
   return (
     <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "Arial, Helvetica, sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Mono:wght@400;500;600&display=swap'); * { box-sizing: border-box; } .mono { font-family: 'IBM Plex Mono', monospace; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #E5FF3D; color: #000000; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Mono:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } .mono { font-family: 'IBM Plex Mono', monospace; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #E5FF3D; color: #000000; }`}</style>
 
       {/* Hero */}
-      <header style={{ padding: "56px 24px 32px", maxWidth: 1040, margin: "0 auto", position: "relative" }}>
-        <div className="mono" style={{ fontSize: 12, letterSpacing: "0.12em", color: "#F693BF", marginBottom: 16, textTransform: "uppercase" }}>
+      <header style={{ padding: "56px 24px 16px", maxWidth: 1040, margin: "0 auto", position: "relative" }}>
+        <div className="mono" style={{ fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", color: "#F693BF", marginBottom: 16, textTransform: "uppercase" }}>
           Callum Akehurst-Ryan · Engineering diagnostics
         </div>
-        <h1 className="header-font" style={{ fontSize: "clamp(28px, 4.4vw, 46px)", fontWeight: 400, lineHeight: 1.15, margin: 0, letterSpacing: "-0.01em", color: "#F693BF" }}>
+        <h1 className="header-font" style={{ fontSize: "var(--fs-display)", fontWeight: 400, lineHeight: 1.15, margin: 0, letterSpacing: "var(--ls-display)", color: "#F693BF" }}>
           AI won't fix a dysfunctional team…
           <br />
           <span style={{ color: "#F693BF" }}>it'll expose it</span>
         </h1>
-        <p style={{ fontSize: 17, color: "#F693BF", maxWidth: 620, marginTop: 20, lineHeight: 1.6 }}>
+        <p style={{ fontSize: "var(--fs-subtitle)", color: "#F693BF", maxWidth: 620, marginTop: 20, lineHeight: 1.6 }}>
           Score your team honestly across five foundational signals before you hand engineers AI agents. Weak
           foundations don't get fixed by faster tooling, they get amplified by it.
         </p>
       </header>
 
-      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "0 24px 80px", display: "grid", gridTemplateColumns: "1fr", gap: 32 }}>
+      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "0 24px 80px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
         {/* Chart + summary panel */}
         <section
           style={{
@@ -262,7 +262,7 @@ export default function App() {
             gap: 32,
             background: "#000000",
             border: "1px solid #3A2530",
-            borderRadius: 4,
+            borderRadius: 0,
             padding: 32,
           }}
           className="radar-grid"
@@ -314,7 +314,7 @@ export default function App() {
                   <PolarRadiusAxis
                     angle={90}
                     domain={[0, 4]}
-                    tick={{ fill: "#F693BF", fontSize: 10 }}
+                    tick={{ fill: "#F693BF", fontSize: 11 }}
                     tickCount={5}
                     axisLine={{ stroke: "#F693BF", strokeOpacity: 0.35 }}
                   />
@@ -342,10 +342,11 @@ export default function App() {
                 </RadarChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
-              <span className="mono" style={{ fontSize: 11, color: "#F693BF", alignSelf: "center", marginRight: 4 }}>
+            <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
+              <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
                 Compare to:
               </span>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {ARCHETYPES.map((a) => {
                 const active = compareWith?.kind === "archetype" && compareWith.key === a.name;
                 return (
@@ -354,9 +355,9 @@ export default function App() {
                     onClick={() => setCompareWith(active ? null : { kind: "archetype", key: a.name })}
                     className="mono band-btn"
                     style={{
-                      fontSize: 11,
+                      fontSize: "var(--fs-label)",
                       padding: "5px 10px",
-                      borderRadius: 3,
+                      borderRadius: 0,
                       border: `1px solid ${active ? "#E5FF3D" : "#3A2530"}`,
                       background: active ? "rgba(229,255,61,0.12)" : "transparent",
                       color: active ? "#E5FF3D" : "#F693BF",
@@ -367,13 +368,15 @@ export default function App() {
                   </button>
                 );
               })}
+              </div>
             </div>
 
             {history.length > 0 ? (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8, alignItems: "center" }}>
-                <span className="mono" style={{ fontSize: 11, color: "#F693BF", alignSelf: "center", marginRight: 4 }}>
+              <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
+                <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
                   Past sessions:
                 </span>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                 {[...history].reverse().map((h) => {
                   const active = compareWith?.kind === "session" && compareWith.key === h.id;
                   return (
@@ -382,9 +385,9 @@ export default function App() {
                         onClick={() => setCompareWith(active ? null : { kind: "session", key: h.id })}
                         className="mono band-btn"
                         style={{
-                          fontSize: 11,
+                          fontSize: "var(--fs-label)",
                           padding: "5px 10px",
-                          borderRadius: "3px 0 0 3px",
+                          borderRadius: 0,
                           borderStyle: "solid",
                           borderWidth: "1px 0 1px 1px",
                           borderColor: active ? "#5CC8FF" : "#3A2530",
@@ -399,9 +402,9 @@ export default function App() {
                         className="mono"
                         title="Delete this session"
                         style={{
-                          fontSize: 11,
+                          fontSize: "var(--fs-label)",
                           padding: "5px 8px",
-                          borderRadius: "0 3px 3px 0",
+                          borderRadius: 0,
                           border: `1px solid ${active ? "#5CC8FF" : "#3A2530"}`,
                           background: "transparent",
                           color: "#F693BF",
@@ -417,7 +420,7 @@ export default function App() {
                   onClick={clearHistory}
                   className="mono"
                   style={{
-                    fontSize: 11,
+                    fontSize: "var(--fs-label)",
                     background: "none",
                     border: "none",
                     color: "#F693BF",
@@ -429,32 +432,38 @@ export default function App() {
                 >
                   Clear history
                 </button>
+                </div>
               </div>
             ) : (
-              <div className="mono" style={{ fontSize: 11, color: "#F693BF", opacity: 0.7, marginTop: 8 }}>
-                Save your first session to start tracking trends over time.
+              <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
+                <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
+                  Past sessions:
+                </span>
+                <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", opacity: 0.7, paddingTop: 6 }}>
+                  Save your first session to start tracking trends over time.
+                </div>
               </div>
             )}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", borderLeft: "1px solid #3A2530", paddingLeft: 32 }}>
-            <div className="mono" style={{ fontSize: 11, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
               Overall reading
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginTop: 6 }}>
-              <div style={{ fontSize: 40, fontWeight: 700, color: allHigh ? "#E5FF3D" : band.color }}>
+              <div style={{ fontSize: "var(--fs-stat)", fontWeight: 700, color: band.color }}>
                 {avg.toFixed(1)}
-                <span style={{ fontSize: 18, color: "#F693BF", fontWeight: 500 }}> / 4</span>
+                <span style={{ fontSize: "var(--fs-heading)", color: "#F693BF", fontWeight: 500 }}> / 4</span>
               </div>
               <div
                 className="mono"
                 style={{
-                  fontSize: 12,
+                  fontSize: "var(--fs-label)",
                   color: band.color,
                   textTransform: "uppercase",
-                  letterSpacing: "0.04em",
+                  letterSpacing: "var(--ls-label)",
                   border: `1px solid ${band.color}`,
-                  borderRadius: 3,
+                  borderRadius: 0,
                   padding: "3px 8px",
                 }}
               >
@@ -464,22 +473,33 @@ export default function App() {
             {lastSession && (
               <div
                 className="mono"
-                style={{ fontSize: 12, color: overallTrend > 0 ? "#E5FF3D" : "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
+                style={{ fontSize: "var(--fs-label)", color: overallTrend > 0 ? "#E5FF3D" : "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
               >
                 {overallTrend > 0 ? "▲" : overallTrend < 0 ? "▼" : "–"} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
               </div>
             )}
-            <p style={{ fontSize: 14, color: "#F693BF", marginTop: 12, lineHeight: 1.6 }}>
+            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", marginTop: 12, lineHeight: 1.6 }}>
               {band.advice}
             </p>
             <div style={{ marginTop: 20, padding: 16, background: "#000000", border: "1px solid #3A2530", borderRadius: 3 }}>
-              <div className="mono" style={{ fontSize: 10, color: "#E5FF3D", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
                 Weakest signal
               </div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginTop: 6, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.02em" }}>{weak.short}</div>
-              <div className="mono" style={{ fontSize: 11, color: "#F693BF", marginTop: 4 }}>
-                {BAND_SHORT[scores[weak.key] - 1]} · this is the one to sort first
-              </div>
+              {allMax ? (
+                <>
+                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 6, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>N/A</div>
+                  <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
+                    Every signal is at maximum · nothing to sort first
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 6, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{weak.short}</div>
+                  <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
+                    {BAND_SHORT[scores[weak.key] - 1]} · this is the one to sort first
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -487,13 +507,13 @@ export default function App() {
         {/* Signal scoring */}
         <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div className="mono" style={{ fontSize: 12, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
               Score each signal
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span
                 className="mono"
-                style={{ fontSize: 11, color: "#E5FF3D", opacity: justSaved ? 1 : 0, transition: "opacity 0.3s ease" }}
+                style={{ fontSize: "var(--fs-label)", color: "#E5FF3D", opacity: justSaved ? 1 : 0, transition: "opacity 0.3s ease" }}
               >
                 Saved in this browser
               </span>
@@ -501,12 +521,12 @@ export default function App() {
                 onClick={saveSession}
                 className="mono"
                 style={{
-                  fontSize: 11,
+                  fontSize: "var(--fs-label)",
                   padding: "5px 10px",
-                  borderRadius: 3,
-                  border: "1px solid #E5FF3D",
-                  background: "rgba(229,255,61,0.1)",
-                  color: "#E5FF3D",
+                  borderRadius: 0,
+                  border: "1px solid #F693BF",
+                  background: "#F693BF",
+                  color: "#000000",
                   cursor: "pointer",
                   textTransform: "uppercase",
                 }}
@@ -517,9 +537,9 @@ export default function App() {
                 onClick={resetScores}
                 className="mono"
                 style={{
-                  fontSize: 11,
+                  fontSize: "var(--fs-label)",
                   padding: "5px 10px",
-                  borderRadius: 3,
+                  borderRadius: 0,
                   border: "1px solid #3A2530",
                   background: "transparent",
                   color: "#F693BF",
@@ -537,25 +557,22 @@ export default function App() {
               style={{
                 background: "#000000",
                 border: "1px solid #3A2530",
-                borderRadius: 4,
+                borderRadius: 0,
                 padding: 24,
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
                 <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.02em" }}>{s.short}</h3>
-                  <p style={{ fontSize: 14, color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5 }}>{s.question}</p>
+                  <h3 style={{ fontSize: "var(--fs-heading)", fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{s.short}</h3>
+                  <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5 }}>{s.question}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div className="mono" style={{ fontSize: 13, color: "#E5FF3D", whiteSpace: "nowrap" }}>
-                    {BAND_SHORT[scores[s.key] - 1]}
-                  </div>
                   {lastSession && (
                     <div
                       className="mono"
                       title={`vs last session (${formatSessionDate(lastSession.date)})`}
                       style={{
-                        fontSize: 12,
+                        fontSize: "var(--fs-label)",
                         color: scores[s.key] > lastSession.scores[s.key] ? "#E5FF3D" : "#F693BF",
                         opacity: scores[s.key] === lastSession.scores[s.key] ? 0.5 : 1,
                       }}
@@ -577,14 +594,14 @@ export default function App() {
                       className="band-btn"
                       style={{
                         padding: "10px 8px",
-                        borderRadius: 3,
+                        borderRadius: 0,
                         border: `1px solid ${active ? "#E5FF3D" : "#3A2530"}`,
                         background: active ? "rgba(229,255,61,0.1)" : "#000000",
                         color: active ? "#E5FF3D" : "#F693BF",
                       }}
                     >
-                      <div className="mono" style={{ fontSize: 11 }}>{val}</div>
-                      <div style={{ fontSize: 10, marginTop: 3, opacity: 0.85 }}>{label}</div>
+                      <div className="mono" style={{ fontSize: "var(--fs-label)", fontWeight: 600 }}>{val}</div>
+                      <div className="mono" style={{ fontSize: "var(--fs-label)", marginTop: 3, opacity: 0.85, textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{label}</div>
                     </button>
                   );
                 })}
@@ -598,7 +615,7 @@ export default function App() {
                   background: "none",
                   border: "none",
                   color: "#F693BF",
-                  fontSize: 12,
+                  fontSize: "var(--fs-label)",
                   cursor: "pointer",
                   padding: 0,
                 }}
@@ -609,8 +626,8 @@ export default function App() {
               {expanded === s.key && (
                 <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
                   {s.bands.map((bandText, i) => (
-                    <div key={i} className="band-desc-row" style={{ display: "flex", gap: 16, fontSize: 13, color: "#F693BF", lineHeight: 1.5 }}>
-                      <span className="mono" style={{ color: "#F693BF", flexShrink: 0, width: 230 }}>{i + 1} · {BAND_LABELS[i]}</span>
+                    <div key={i} className="band-desc-row" style={{ display: "flex", gap: 16, fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.5 }}>
+                      <span style={{ color: "#F693BF", flexShrink: 0, width: 230, fontWeight: 600 }}>{i + 1} · {BAND_LABELS[i]}</span>
                       <span>{bandText}</span>
                     </div>
                   ))}
@@ -622,13 +639,13 @@ export default function App() {
 
         {/* Footer note */}
         <footer style={{ borderTop: "1px solid #3A2530", paddingTop: 24, marginTop: 8 }}>
-          <p style={{ fontSize: 13, color: "#F693BF", lineHeight: 1.6, maxWidth: 640 }}>
+          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 640 }}>
             This radar sits underneath frameworks like DORA, TMMi, or Team Topologies… it's a conversation tool, not
             a replacement for them. It tells you if your foundations can take the pace, not whether the AI you've
             added is actually working. Run it as a team exercise: score individually, plot together, and go with
             the lowest score where you disagree.
           </p>
-          <p className="mono" style={{ fontSize: 11, color: "#F693BF", marginTop: 16 }}>
+          <p className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 16 }}>
             Framework by Callum Akehurst-Ryan · cakehurstryan.com
           </p>
         </footer>
@@ -640,6 +657,8 @@ export default function App() {
           .radar-grid > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid #3A2530; padding-top: 24px; margin-top: 8px; }
           .band-desc-row { flex-direction: column !important; gap: 2px !important; }
           .band-desc-row > span:first-child { width: auto !important; }
+          .compare-row { flex-direction: column !important; gap: 6px !important; }
+          .compare-label { width: auto !important; padding-top: 0 !important; }
         }
       `}</style>
     </div>
