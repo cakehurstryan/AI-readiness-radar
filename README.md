@@ -6,7 +6,8 @@ dysfunctional team, it exposes it — this tool helps you find the cracks
 before you hand out agents.
 
 Score your team across five signals, see the results on a radar chart,
-and compare against common team archetypes.
+compare against common team archetypes, and save sessions to track how
+your scores trend over time.
 
 ![AI Readiness Radar demo](docs/radar-demo.gif)
 
@@ -20,6 +21,22 @@ and compare against common team archetypes.
 
 Each signal is scored 1–4 (No maturity → Low → Moderate → High), with
 detailed descriptions for each band to keep scoring honest and consistent.
+
+## Tracking over time
+
+Your in-progress scores auto-save to the browser as you go. When you're
+ready to log an assessment, hit **Save session** to record it as a dated
+snapshot:
+
+- Past sessions show up as pills you can overlay on the radar chart
+  (alongside the archetype comparisons), so you can see a session
+  side-by-side with your current scores.
+- The overall score and each signal card show a trend indicator (▲/▼/–)
+  against the most recently saved session.
+- Delete individual sessions or clear all history at any time.
+
+All data is stored locally in your browser (`localStorage`) — nothing
+leaves your machine, and there's no account or backend involved.
 
 ## Getting started
 
