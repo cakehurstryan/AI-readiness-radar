@@ -694,6 +694,12 @@ export default function App() {
             added is actually working. Run it as a team exercise: score individually, plot together, and go with the
             lowest score where you disagree.
           </p>
+          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 720, margin: "14px 0 0" }}>
+            Read the full write up about using AI radars for engineering foundation assessment{" "}
+            <a href="https://cakehurstryan.com/2026/06/12/ai-readiness-radar/" style={{ color: "#F693BF", textDecoration: "underline" }}>
+              here
+            </a>.
+          </p>
         </div>
       </main>
 
