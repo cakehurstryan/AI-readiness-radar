@@ -10,7 +10,7 @@ const SIGNALS = [
       "Pure feature factory. The team builds what it gets told without any grasp of the why (who wants it and what's good enough). AI in this environment just produces more of the wrong thing.",
       "Some people get it but it's uneven. The \"why\" is understood by Product manager but the engineers don't so only Product can sign things off; this gap means AI starts making decisions based on incomplete context.",
       "Most of the team understands product direction, customers, and trade-offs and can explain why things are built. Good enough is a shared concept and not a moving target.",
-      "The whole team shares enough domain and market knowledge to make deliberate calls on what they're shipping. They can push back on the wrong things and know when something is good enough… they don't need to be told. This is honestly the hardest one to score because teams think they're here until you start asking specific probing questions and then the gaps appear.",
+      "The whole team shares enough domain and market knowledge to make deliberate calls on what they're shipping. They can push back on the wrong things and know when something is good enough… they don't need to be told.",
     ],
   },
   {
@@ -219,7 +219,7 @@ export default function App() {
     if (!compareWith) return null;
     if (compareWith.kind === "archetype") {
       const a = ARCHETYPES.find((a) => a.name === compareWith.key);
-      return a ? { label: a.name, scores: a.scores, color: "#E8A0B8" } : null;
+      return a ? { label: a.name, scores: a.scores, color: "#FFFFFF" } : null;
     }
     const session = history.find((h) => h.id === compareWith.key);
     return session ? { label: formatSessionDate(session.date), scores: session.scores, color: "#FFFFFF" } : null;
@@ -244,14 +244,14 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`}</style>
 
       {/* Site header — mirrors cakehurstryan.com */}
-      <header style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+      <header style={{ padding: "20px max(24px, 4vw)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <a href="https://cakehurstryan.com/" aria-label="Callum Akehurst-Ryan — home" style={{ display: "inline-flex" }}>
           <img src="/avatar.png" alt="Callum Akehurst-Ryan" width={44} height={44} style={{ borderRadius: "50%", display: "block", border: "1px solid #3A2530" }} />
         </a>
-        <nav className="mono" style={{ display: "flex", gap: 22, flexWrap: "wrap", fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", textTransform: "uppercase" }}>
+        <nav className="mono" style={{ display: "flex", gap: 22, flexWrap: "wrap", fontSize: 14, fontWeight: 500, letterSpacing: "var(--ls-label)", textTransform: "uppercase" }}>
           {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"]].map(([label, href]) => (
             <a key={href} href={href} style={{ color: "#F693BF", textDecoration: "none" }}>{label}</a>
           ))}
@@ -259,23 +259,20 @@ export default function App() {
       </header>
 
       {/* Page title + tagline (radar-first: no image band) */}
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px 24px 0" }}>
-        <div className="mono" style={{ fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", color: "#F693BF", marginBottom: 14, textTransform: "uppercase" }}>
-          Engineering diagnostics
-        </div>
-        <h1 className="header-font" style={{ fontSize: "var(--fs-display)", fontWeight: 400, lineHeight: 1.05, margin: 0, letterSpacing: "var(--ls-display)", color: "#F693BF", textTransform: "uppercase" }}>
+      <div style={{ padding: "24px max(24px, 4vw) 0" }}>
+        <h1 className="header-font" style={{ fontSize: "clamp(40px, 9vw, 70px)", fontWeight: 600, lineHeight: 1.0, margin: 0, letterSpacing: "normal", color: "#F693BF", textTransform: "uppercase" }}>
           AI Readiness Radar
         </h1>
-        <p style={{ fontSize: "var(--fs-subtitle)", fontWeight: 600, color: "#F693BF", margin: "18px 0 0", lineHeight: 1.3, maxWidth: 720 }}>
+        <p style={{ fontSize: "var(--fs-subtitle)", fontWeight: 600, color: "#F693BF", margin: "18px 0 0", lineHeight: 1.3, maxWidth: 720, textTransform: "uppercase" }}>
           AI won't fix a dysfunctional team… it'll expose it
         </p>
-        <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "10px 0 0", maxWidth: 620, lineHeight: 1.6 }}>
+        <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "10px 0 0", maxWidth: 720, lineHeight: 1.6 }}>
           Score your team honestly across five foundational signals before you hand engineers AI agents. Weak
           foundations don't get fixed by faster tooling, they get amplified by it.
         </p>
       </div>
 
-      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 24px 27px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+      <main style={{ padding: "20px max(24px, 4vw) 27px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
         {/* Chart + summary panel */}
         <section
           style={{
@@ -380,9 +377,9 @@ export default function App() {
                       fontSize: "var(--fs-label)",
                       padding: "5px 10px",
                       borderRadius: 0,
-                      border: `1px solid ${active ? "#E5FF3D" : "#3A2530"}`,
-                      background: active ? "rgba(229,255,61,0.12)" : "transparent",
-                      color: active ? "#E5FF3D" : "#F693BF",
+                      border: `1px solid ${active ? "#FFFFFF" : "#3A2530"}`,
+                      background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                      color: active ? "#FFFFFF" : "#F693BF",
                       textTransform: "uppercase",
                     }}
                   >
@@ -413,7 +410,7 @@ export default function App() {
                           borderStyle: "solid",
                           borderWidth: "1px 0 1px 1px",
                           borderColor: active ? "#FFFFFF" : "#3A2530",
-                          background: active ? "rgba(92,200,255,0.12)" : "transparent",
+                          background: active ? "rgba(255,255,255,0.12)" : "transparent",
                           color: active ? "#FFFFFF" : "#F693BF",
                         }}
                       >
@@ -468,7 +465,7 @@ export default function App() {
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", borderLeft: "1px solid #3A2530", paddingLeft: 32 }}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", borderLeft: "1px solid #3A2530", paddingLeft: 32 }}>
             <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
               Overall reading
             </div>
@@ -479,15 +476,7 @@ export default function App() {
               </div>
               <div
                 className="mono"
-                style={{
-                  fontSize: "var(--fs-label)",
-                  color: band.color,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--ls-label)",
-                  border: `1px solid ${band.color}`,
-                  borderRadius: 0,
-                  padding: "3px 8px",
-                }}
+                style={{ fontSize: "var(--fs-label)", color: band.color, textTransform: "uppercase", letterSpacing: "var(--ls-label)", border: `1px solid ${band.color}`, borderRadius: 0, padding: "3px 8px" }}
               >
                 {band.label}
               </div>
@@ -495,44 +484,80 @@ export default function App() {
             {lastSession && (
               <div
                 className="mono"
-                style={{ fontSize: "var(--fs-label)", color: overallTrend > 0 ? "#E5FF3D" : "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
+                style={{ fontSize: "var(--fs-label)", color: "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
               >
                 {overallTrend > 0 ? "▲" : overallTrend < 0 ? "▼" : "–"} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
               </div>
             )}
-            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", marginTop: 12, lineHeight: 1.6 }}>
+            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", marginTop: 10, lineHeight: 1.5 }}>
               {band.advice}
             </p>
-            <div style={{ marginTop: 20, padding: 16, background: "#000000", border: "1px solid #3A2530", borderRadius: 3 }}>
+            <div style={{ marginTop: 16, padding: 12, background: "#000000", border: "1px solid #3A2530", borderRadius: 0 }}>
               <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
                 Weakest signal
               </div>
               {allMax ? (
                 <>
-                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 6, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>N/A</div>
+                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 4, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>N/A</div>
                   <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
-                    Every signal is at maximum · nothing to sort first
+                    Every signal is at maximum
                   </div>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 6, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{weak.short}</div>
+                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 4, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{weak.short}</div>
                   <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
                     {BAND_SHORT[scores[weak.key] - 1]} · this is the one to sort first
                   </div>
                 </>
               )}
             </div>
+
+            {/* Compact selector — hidden on stacked/mobile in favour of the full cards below */}
+            <div className="adjust-scores">
+            <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", marginTop: 16, marginBottom: 4 }}>
+              Quick adjust
+            </div>
+            <div>
+              {SIGNALS.map((s) => (
+                <div key={s.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "5px 0", borderTop: "1px solid #241016" }}>
+                  <a href={`#signal-${s.key}`} title="Jump to guidance for this signal" style={{ fontSize: 12.5, fontWeight: 500, color: "#F693BF", lineHeight: 1.2, textDecoration: "none" }}>{s.short}</a>
+                  <div style={{ display: "flex", flexShrink: 0, border: "1px solid #3A2530" }}>
+                    {[1, 2, 3, 4].map((v, i) => {
+                      const active = scores[s.key] === v;
+                      return (
+                        <button
+                          key={v}
+                          onClick={() => setScores((prev) => ({ ...prev, [s.key]: v }))}
+                          className="mono"
+                          aria-label={`${s.short}: ${BAND_SHORT[v - 1]}`}
+                          title={BAND_SHORT[v - 1]}
+                          style={{ width: 26, height: 26, borderRadius: 0, cursor: "pointer", fontSize: "var(--fs-label)", border: "none", borderLeft: i > 0 ? "1px solid #3A2530" : "none", background: active ? "rgba(229,255,61,0.18)" : "transparent", color: active ? "#E5FF3D" : "#F693BF", fontWeight: active ? 600 : 400, transition: "background 0.12s ease" }}
+                        >
+                          {v}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            </div>
+            <a href="#score" className="mono" style={{ display: "inline-block", marginTop: 14, fontSize: "var(--fs-label)", color: "#F693BF", textDecoration: "none" }}>
+              New here? Read what each level means below
+            </a>
           </div>
         </section>
 
         {/* Signal scoring */}
         <section id="score" style={{ display: "flex", flexDirection: "column", gap: 16, scrollMarginTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
-              Score each signal
+          <div className="score-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div>
+              <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
+                Score each signal (full descriptions)
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="score-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span
                 className="mono"
                 style={{ fontSize: "var(--fs-label)", color: "#E5FF3D", opacity: justSaved ? 1 : 0, transition: "opacity 0.3s ease" }}
@@ -576,17 +601,19 @@ export default function App() {
           {SIGNALS.map((s) => (
             <div
               key={s.key}
+              id={`signal-${s.key}`}
               style={{
                 background: "#000000",
                 border: "1px solid #3A2530",
                 borderRadius: 0,
                 padding: 24,
+                scrollMarginTop: 16,
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
                 <div>
                   <h3 style={{ fontSize: "var(--fs-heading)", fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{s.short}</h3>
-                  <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5 }}>{s.question}</p>
+                  <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5, textWrap: "pretty" }}>{s.question}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {lastSession && (
@@ -595,7 +622,7 @@ export default function App() {
                       title={`vs last session (${formatSessionDate(lastSession.date)})`}
                       style={{
                         fontSize: "var(--fs-label)",
-                        color: scores[s.key] > lastSession.scores[s.key] ? "#E5FF3D" : "#F693BF",
+                        color: "#F693BF",
                         opacity: scores[s.key] === lastSession.scores[s.key] ? 0.5 : 1,
                       }}
                     >
@@ -672,13 +699,15 @@ export default function App() {
 
       {/* Site footer — mirrors cakehurstryan.com */}
       <footer style={{ borderTop: "1px solid #3A2530", marginTop: 8 }}>
-        <div className="footer-grid" style={{ maxWidth: 1040, margin: "0 auto", padding: "40px 24px 56px", display: "grid", gridTemplateColumns: "1.5fr 0.8fr 0.8fr", gap: 24 }}>
+        <div className="footer-grid" style={{ padding: "40px max(24px, 4vw) 56px", display: "grid", gridTemplateColumns: "1.5fr 0.8fr 0.8fr", gap: 24 }}>
           <div>
             <div style={{ color: "#F693BF", fontSize: 16, fontWeight: 600, textTransform: "uppercase" }}>
               Callum Akehurst-Ryan
             </div>
             <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, marginTop: 14, maxWidth: 460 }}>
-              Staff Quality Engineer writing and speaking about testing, quality engineering and AI readiness.
+              I think quality is something that the whole team owns… not a gate that one person stands in front of.
+              I'm a Staff Quality Engineer who writes and speaks about testing, quality engineering and AI readiness
+              (with the odd gaming analogy thrown in).
             </p>
             <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", fontStyle: "italic", marginTop: 16 }}>
               © Callum Akehurst-Ryan 2026
@@ -686,24 +715,24 @@ export default function App() {
           </div>
           <div style={{ border: "1px solid #F693BF", padding: 12 }}>
             <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
-              Pages
+              Contact
             </div>
-            {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"]].map(([label, href]) => (
-              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-                {label}
-              </a>
-            ))}
+            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+              LinkedIn
+            </a>
+            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+              Email
+            </a>
           </div>
           <div style={{ border: "1px solid #F693BF", padding: 12 }}>
             <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
-              Connect
+              Pages
             </div>
-            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-              LinkedIn
-            </a>
-            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-              Email
-            </a>
+            {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"], ["AI Readiness Radar", "https://radar.cakehurstryan.com/"]].map(([label, href]) => (
+              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
@@ -717,6 +746,9 @@ export default function App() {
           .compare-row { flex-direction: column !important; gap: 6px !important; }
           .compare-label { width: auto !important; padding-top: 0 !important; }
           .footer-grid { grid-template-columns: 1fr !important; }
+          .adjust-scores { display: none !important; }
+          .score-header { flex-direction: column-reverse !important; align-items: flex-start !important; }
+          .score-actions { align-self: flex-end !important; }
         }
       `}</style>
     </div>
