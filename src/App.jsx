@@ -718,9 +718,9 @@ export default function App() {
             lowest score where you disagree.
           </p>
           <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 720, margin: "14px 0 0" }}>
-            Read the full write up about using AI radars for engineering foundation assessment{" "}
+            Read the{" "}
             <a href="https://cakehurstryan.com/2026/06/12/ai-readiness-radar/" style={{ color: "#F693BF", textDecoration: "underline" }}>
-              here
+              full write-up about using AI radars for engineering foundation assessment
             </a>.
           </p>
         </div>
