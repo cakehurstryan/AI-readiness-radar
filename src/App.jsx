@@ -163,6 +163,15 @@ function loadStoredHistory() {
   }
 }
 
+// crypto.randomUUID only exists in a secure context (https / localhost).
+// On plain http the app still needs unique ids, so fall back gracefully.
+function makeId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function formatSessionDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
@@ -187,7 +196,7 @@ export default function App() {
   };
 
   const saveSession = () => {
-    const entry = { id: crypto.randomUUID(), date: new Date().toISOString(), scores };
+    const entry = { id: makeId(), date: new Date().toISOString(), scores };
     const next = [...history, entry];
     setHistory(next);
     window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(next));
