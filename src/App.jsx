@@ -222,7 +222,7 @@ export default function App() {
       return a ? { label: a.name, scores: a.scores, color: "#E8A0B8" } : null;
     }
     const session = history.find((h) => h.id === compareWith.key);
-    return session ? { label: formatSessionDate(session.date), scores: session.scores, color: "#5CC8FF" } : null;
+    return session ? { label: formatSessionDate(session.date), scores: session.scores, color: "#FFFFFF" } : null;
   }, [compareWith, history]);
 
   const chartData = useMemo(
@@ -243,26 +243,39 @@ export default function App() {
   const overallTrend = lastSession ? avg - average(lastSession.scores) : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "Arial, Helvetica, sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Mono:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } .mono { font-family: 'IBM Plex Mono', monospace; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #E5FF3D; color: #000000; }`}</style>
+    <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "'Montserrat', system-ui, sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;500;600&display=swap'); :root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`}</style>
 
-      {/* Hero */}
-      <header style={{ padding: "56px 24px 16px", maxWidth: 1040, margin: "0 auto", position: "relative" }}>
-        <div className="mono" style={{ fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", color: "#F693BF", marginBottom: 16, textTransform: "uppercase" }}>
-          Callum Akehurst-Ryan · Engineering diagnostics
+      {/* Site header — mirrors cakehurstryan.com */}
+      <header style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <a href="https://cakehurstryan.com/" aria-label="Callum Akehurst-Ryan — home" style={{ display: "inline-flex" }}>
+          <img src="/avatar.png" alt="Callum Akehurst-Ryan" width={44} height={44} style={{ borderRadius: "50%", display: "block", border: "1px solid #3A2530" }} />
+        </a>
+        <nav className="mono" style={{ display: "flex", gap: 22, flexWrap: "wrap", fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", textTransform: "uppercase" }}>
+          {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"]].map(([label, href]) => (
+            <a key={href} href={href} style={{ color: "#F693BF", textDecoration: "none" }}>{label}</a>
+          ))}
+        </nav>
+      </header>
+
+      {/* Page title + tagline (radar-first: no image band) */}
+      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px 24px 0" }}>
+        <div className="mono" style={{ fontSize: "var(--fs-label)", letterSpacing: "var(--ls-label)", color: "#F693BF", marginBottom: 14, textTransform: "uppercase" }}>
+          Engineering diagnostics
         </div>
-        <h1 className="header-font" style={{ fontSize: "var(--fs-display)", fontWeight: 400, lineHeight: 1.15, margin: 0, letterSpacing: "var(--ls-display)", color: "#F693BF" }}>
-          AI won't fix a dysfunctional team…
-          <br />
-          <span style={{ color: "#F693BF" }}>it'll expose it</span>
+        <h1 className="header-font" style={{ fontSize: "var(--fs-display)", fontWeight: 400, lineHeight: 1.05, margin: 0, letterSpacing: "var(--ls-display)", color: "#F693BF", textTransform: "uppercase" }}>
+          AI Readiness Radar
         </h1>
-        <p style={{ fontSize: "var(--fs-subtitle)", color: "#F693BF", maxWidth: 620, marginTop: 20, lineHeight: 1.6 }}>
+        <p style={{ fontSize: "var(--fs-subtitle)", fontWeight: 600, color: "#F693BF", margin: "18px 0 0", lineHeight: 1.3, maxWidth: 720 }}>
+          AI won't fix a dysfunctional team… it'll expose it
+        </p>
+        <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "10px 0 0", maxWidth: 620, lineHeight: 1.6 }}>
           Score your team honestly across five foundational signals before you hand engineers AI agents. Weak
           foundations don't get fixed by faster tooling, they get amplified by it.
         </p>
-      </header>
+      </div>
 
-      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "0 24px 80px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 24px 27px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
         {/* Chart + summary panel */}
         <section
           style={{
@@ -272,12 +285,12 @@ export default function App() {
             background: "#000000",
             border: "1px solid #3A2530",
             borderRadius: 0,
-            padding: 32,
+            padding: 24,
           }}
           className="radar-grid"
         >
           <div>
-            <div style={{ height: 380 }}>
+            <div style={{ height: 340 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={chartData} outerRadius="58%" margin={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <PolarGrid stroke="#F693BF" strokeOpacity={0.35} />
@@ -309,7 +322,7 @@ export default function App() {
                           dominantBaseline="middle"
                           fill="#F693BF"
                           fontSize={11}
-                          fontFamily="Arial, Helvetica, sans-serif"
+                          fontFamily="'Montserrat', system-ui, sans-serif"
                         >
                           {words.map((word, i) => (
                             <tspan key={i} x={ox} dy={i === 0 ? startDy : lineHeight}>
@@ -399,9 +412,9 @@ export default function App() {
                           borderRadius: 0,
                           borderStyle: "solid",
                           borderWidth: "1px 0 1px 1px",
-                          borderColor: active ? "#5CC8FF" : "#3A2530",
+                          borderColor: active ? "#FFFFFF" : "#3A2530",
                           background: active ? "rgba(92,200,255,0.12)" : "transparent",
-                          color: active ? "#5CC8FF" : "#F693BF",
+                          color: active ? "#FFFFFF" : "#F693BF",
                         }}
                       >
                         {formatSessionDate(h.date)} · {average(h.scores).toFixed(1)}
@@ -414,7 +427,7 @@ export default function App() {
                           fontSize: "var(--fs-label)",
                           padding: "5px 8px",
                           borderRadius: 0,
-                          border: `1px solid ${active ? "#5CC8FF" : "#3A2530"}`,
+                          border: `1px solid ${active ? "#FFFFFF" : "#3A2530"}`,
                           background: "transparent",
                           color: "#F693BF",
                           cursor: "pointer",
@@ -514,7 +527,7 @@ export default function App() {
         </section>
 
         {/* Signal scoring */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <section id="score" style={{ display: "flex", flexDirection: "column", gap: 16, scrollMarginTop: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
             <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
               Score each signal
@@ -646,19 +659,54 @@ export default function App() {
           ))}
         </section>
 
-        {/* Footer note */}
-        <footer style={{ borderTop: "1px solid #3A2530", paddingTop: 24, marginTop: 8 }}>
-          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 640 }}>
+        {/* Positioning note */}
+        <div style={{ marginTop: 11 }}>
+          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
             This radar sits underneath frameworks like DORA, TMMi, or Team Topologies… it's a conversation tool, not
             a replacement for them. It tells you if your foundations can take the pace, not whether the AI you've
-            added is actually working. Run it as a team exercise: score individually, plot together, and go with
-            the lowest score where you disagree.
+            added is actually working. Run it as a team exercise: score individually, plot together, and go with the
+            lowest score where you disagree.
           </p>
-          <p className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 16 }}>
-            Framework by Callum Akehurst-Ryan · cakehurstryan.com
-          </p>
-        </footer>
+        </div>
       </main>
+
+      {/* Site footer — mirrors cakehurstryan.com */}
+      <footer style={{ borderTop: "1px solid #3A2530", marginTop: 8 }}>
+        <div className="footer-grid" style={{ maxWidth: 1040, margin: "0 auto", padding: "40px 24px 56px", display: "grid", gridTemplateColumns: "1.5fr 0.8fr 0.8fr", gap: 24 }}>
+          <div>
+            <div style={{ color: "#F693BF", fontSize: 16, fontWeight: 600, textTransform: "uppercase" }}>
+              Callum Akehurst-Ryan
+            </div>
+            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, marginTop: 14, maxWidth: 460 }}>
+              Staff Quality Engineer writing and speaking about testing, quality engineering and AI readiness.
+            </p>
+            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", fontStyle: "italic", marginTop: 16 }}>
+              © Callum Akehurst-Ryan 2026
+            </p>
+          </div>
+          <div style={{ border: "1px solid #F693BF", padding: 12 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
+              Pages
+            </div>
+            {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"]].map(([label, href]) => (
+              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+                {label}
+              </a>
+            ))}
+          </div>
+          <div style={{ border: "1px solid #F693BF", padding: 12 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
+              Connect
+            </div>
+            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+              LinkedIn
+            </a>
+            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
+              Email
+            </a>
+          </div>
+        </div>
+      </footer>
 
       <style>{`
         @media (max-width: 760px) {
@@ -668,6 +716,7 @@ export default function App() {
           .band-desc-row > span:first-child { width: auto !important; }
           .compare-row { flex-direction: column !important; gap: 6px !important; }
           .compare-label { width: auto !important; padding-top: 0 !important; }
+          .footer-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>
