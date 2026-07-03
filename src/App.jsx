@@ -144,9 +144,33 @@ function loadStoredScores() {
   }
 }
 
+const HISTORY_STORAGE_KEY = "ai-readiness-radar:history";
+
+function isValidScores(scores) {
+  return Boolean(scores) && SIGNALS.every((s) => Number.isInteger(scores[s.key]) && scores[s.key] >= 1 && scores[s.key] <= 4);
+}
+
+function loadStoredHistory() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry) => entry && typeof entry.id === "string" && typeof entry.date === "string" && isValidScores(entry.scores));
+  } catch {
+    return [];
+  }
+}
+
+function formatSessionDate(iso) {
+  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
 export default function App() {
   const [scores, setScores] = useState(loadStoredScores);
-  const [compareArchetype, setCompareArchetype] = useState(null);
+  const [history, setHistory] = useState(loadStoredHistory);
+  const [compareWith, setCompareWith] = useState(null); // { kind: "archetype" | "session", key: string } | null
   const [expanded, setExpanded] = useState(null);
   const [justSaved, setJustSaved] = useState(false);
 
@@ -162,20 +186,52 @@ export default function App() {
     window.localStorage.removeItem(STORAGE_KEY);
   };
 
+  const saveSession = () => {
+    const entry = { id: crypto.randomUUID(), date: new Date().toISOString(), scores };
+    const next = [...history, entry];
+    setHistory(next);
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(next));
+  };
+
+  const deleteSession = (id) => {
+    const next = history.filter((h) => h.id !== id);
+    setHistory(next);
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(next));
+    if (compareWith?.kind === "session" && compareWith.key === id) setCompareWith(null);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    window.localStorage.removeItem(HISTORY_STORAGE_KEY);
+    if (compareWith?.kind === "session") setCompareWith(null);
+  };
+
+  const compareSeries = useMemo(() => {
+    if (!compareWith) return null;
+    if (compareWith.kind === "archetype") {
+      const a = ARCHETYPES.find((a) => a.name === compareWith.key);
+      return a ? { label: a.name, scores: a.scores, color: "#E8A0B8" } : null;
+    }
+    const session = history.find((h) => h.id === compareWith.key);
+    return session ? { label: formatSessionDate(session.date), scores: session.scores, color: "#5CC8FF" } : null;
+  }, [compareWith, history]);
+
   const chartData = useMemo(
     () =>
       SIGNALS.map((s) => ({
         signal: s.short.toUpperCase(),
         You: scores[s.key],
-        ...(compareArchetype ? { [compareArchetype]: ARCHETYPES.find((a) => a.name === compareArchetype).scores[s.key] } : {}),
+        ...(compareSeries ? { Compare: compareSeries.scores[s.key] } : {}),
       })),
-    [scores, compareArchetype]
+    [scores, compareSeries]
   );
 
   const avg = average(scores);
   const weak = weakestSignal(scores);
   const band = overallBand(avg);
   const allHigh = Object.values(scores).every((v) => v >= 3);
+  const lastSession = history.length > 0 ? history[history.length - 1] : null;
+  const overallTrend = lastSession ? avg - average(lastSession.scores) : null;
 
   return (
     <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "Arial, Helvetica, sans-serif" }}>
@@ -271,16 +327,16 @@ export default function App() {
                     strokeWidth={2}
                     dot={{ r: 3, fill: "#E5FF3D" }}
                   />
-                  {compareArchetype && (
+                  {compareSeries && (
                     <Radar
-                      name={compareArchetype}
-                      dataKey={compareArchetype}
-                      stroke="#E8A0B8"
-                      fill="#E8A0B8"
+                      name={compareSeries.label}
+                      dataKey="Compare"
+                      stroke={compareSeries.color}
+                      fill={compareSeries.color}
                       fillOpacity={0.08}
                       strokeWidth={1.5}
                       strokeDasharray="4 3"
-                      dot={{ r: 2, fill: "#E8A0B8" }}
+                      dot={{ r: 2, fill: compareSeries.color }}
                     />
                   )}
                 </RadarChart>
@@ -290,25 +346,95 @@ export default function App() {
               <span className="mono" style={{ fontSize: 11, color: "#F693BF", alignSelf: "center", marginRight: 4 }}>
                 Compare to:
               </span>
-              {ARCHETYPES.map((a) => (
+              {ARCHETYPES.map((a) => {
+                const active = compareWith?.kind === "archetype" && compareWith.key === a.name;
+                return (
+                  <button
+                    key={a.name}
+                    onClick={() => setCompareWith(active ? null : { kind: "archetype", key: a.name })}
+                    className="mono band-btn"
+                    style={{
+                      fontSize: 11,
+                      padding: "5px 10px",
+                      borderRadius: 3,
+                      border: `1px solid ${active ? "#E5FF3D" : "#3A2530"}`,
+                      background: active ? "rgba(229,255,61,0.12)" : "transparent",
+                      color: active ? "#E5FF3D" : "#F693BF",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {a.name}
+                  </button>
+                );
+              })}
+            </div>
+
+            {history.length > 0 ? (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8, alignItems: "center" }}>
+                <span className="mono" style={{ fontSize: 11, color: "#F693BF", alignSelf: "center", marginRight: 4 }}>
+                  Past sessions:
+                </span>
+                {[...history].reverse().map((h) => {
+                  const active = compareWith?.kind === "session" && compareWith.key === h.id;
+                  return (
+                    <div key={h.id} style={{ display: "flex" }}>
+                      <button
+                        onClick={() => setCompareWith(active ? null : { kind: "session", key: h.id })}
+                        className="mono band-btn"
+                        style={{
+                          fontSize: 11,
+                          padding: "5px 10px",
+                          borderRadius: "3px 0 0 3px",
+                          borderStyle: "solid",
+                          borderWidth: "1px 0 1px 1px",
+                          borderColor: active ? "#5CC8FF" : "#3A2530",
+                          background: active ? "rgba(92,200,255,0.12)" : "transparent",
+                          color: active ? "#5CC8FF" : "#F693BF",
+                        }}
+                      >
+                        {formatSessionDate(h.date)} · {average(h.scores).toFixed(1)}
+                      </button>
+                      <button
+                        onClick={() => deleteSession(h.id)}
+                        className="mono"
+                        title="Delete this session"
+                        style={{
+                          fontSize: 11,
+                          padding: "5px 8px",
+                          borderRadius: "0 3px 3px 0",
+                          border: `1px solid ${active ? "#5CC8FF" : "#3A2530"}`,
+                          background: "transparent",
+                          color: "#F693BF",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
                 <button
-                  key={a.name}
-                  onClick={() => setCompareArchetype(compareArchetype === a.name ? null : a.name)}
-                  className="mono band-btn"
+                  onClick={clearHistory}
+                  className="mono"
                   style={{
                     fontSize: 11,
-                    padding: "5px 10px",
-                    borderRadius: 3,
-                    border: `1px solid ${compareArchetype === a.name ? "#E5FF3D" : "#3A2530"}`,
-                    background: compareArchetype === a.name ? "rgba(229,255,61,0.12)" : "transparent",
-                    color: compareArchetype === a.name ? "#E5FF3D" : "#F693BF",
-                    textTransform: "uppercase",
+                    background: "none",
+                    border: "none",
+                    color: "#F693BF",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    padding: 0,
+                    marginLeft: 4,
                   }}
                 >
-                  {a.name}
+                  Clear history
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="mono" style={{ fontSize: 11, color: "#F693BF", opacity: 0.7, marginTop: 8 }}>
+                Save your first session to start tracking trends over time.
+              </div>
+            )}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", borderLeft: "1px solid #3A2530", paddingLeft: 32 }}>
@@ -335,6 +461,14 @@ export default function App() {
                 {band.label}
               </div>
             </div>
+            {lastSession && (
+              <div
+                className="mono"
+                style={{ fontSize: 12, color: overallTrend > 0 ? "#E5FF3D" : "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
+              >
+                {overallTrend > 0 ? "▲" : overallTrend < 0 ? "▼" : "–"} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
+              </div>
+            )}
             <p style={{ fontSize: 14, color: "#F693BF", marginTop: 12, lineHeight: 1.6 }}>
               {band.advice}
             </p>
@@ -363,6 +497,22 @@ export default function App() {
               >
                 Saved in this browser
               </span>
+              <button
+                onClick={saveSession}
+                className="mono"
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 3,
+                  border: "1px solid #E5FF3D",
+                  background: "rgba(229,255,61,0.1)",
+                  color: "#E5FF3D",
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                }}
+              >
+                Save session
+              </button>
               <button
                 onClick={resetScores}
                 className="mono"
@@ -396,8 +546,23 @@ export default function App() {
                   <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "0.02em" }}>{s.short}</h3>
                   <p style={{ fontSize: 14, color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5 }}>{s.question}</p>
                 </div>
-                <div className="mono" style={{ fontSize: 13, color: "#E5FF3D", whiteSpace: "nowrap" }}>
-                  {BAND_SHORT[scores[s.key] - 1]}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div className="mono" style={{ fontSize: 13, color: "#E5FF3D", whiteSpace: "nowrap" }}>
+                    {BAND_SHORT[scores[s.key] - 1]}
+                  </div>
+                  {lastSession && (
+                    <div
+                      className="mono"
+                      title={`vs last session (${formatSessionDate(lastSession.date)})`}
+                      style={{
+                        fontSize: 12,
+                        color: scores[s.key] > lastSession.scores[s.key] ? "#E5FF3D" : "#F693BF",
+                        opacity: scores[s.key] === lastSession.scores[s.key] ? 0.5 : 1,
+                      }}
+                    >
+                      {scores[s.key] > lastSession.scores[s.key] ? "▲" : scores[s.key] < lastSession.scores[s.key] ? "▼" : "–"}
+                    </div>
+                  )}
                 </div>
               </div>
 
