@@ -600,7 +600,7 @@ body{background:var(--pink)}
 .menu-link{font-size:28px;min-height:56px}
 .menu-contact{margin-top:auto;display:flex;flex-direction:column;padding-top:32px}
 
-.intro{padding:24px var(--gut) 0;max-width:calc(720px + 2 * var(--gut))}
+.intro{padding:24px var(--gut) 0}
 .intro .x{margin-top:8px}
 
 .tool{margin-top:var(--sec);background:#000;color:var(--pink);padding:24px var(--gut);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:center}
