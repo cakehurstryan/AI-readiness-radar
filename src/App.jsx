@@ -322,7 +322,7 @@ export default function App() {
         <div className="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="menu-top">
             <button type="button" className="ctl" aria-pressed="true" onClick={() => setMenuOpen(false)}>
-              Menu
+              Close
             </button>
           </div>
           <nav aria-label="Main">
@@ -596,9 +596,9 @@ body{background:var(--pink)}
 .menu-btn{display:none}
 .menu{position:fixed;inset:0;z-index:10;background:var(--pink);color:#000;padding:16px var(--gut) 32px;display:flex;flex-direction:column;overflow:auto}
 .menu-top{display:flex;justify-content:flex-end}
-.menu nav{display:flex;flex-direction:column;margin-top:24px}
+.menu nav{display:flex;flex-direction:column;gap:8px;margin-top:24px}
 .menu-link{font-size:28px;min-height:56px}
-.menu-contact{margin-top:auto;display:flex;flex-direction:column;padding-top:32px}
+.menu-contact{margin-top:auto;display:flex;flex-wrap:wrap;gap:0 24px;padding-top:32px}
 
 .intro{padding:24px var(--gut) 0}
 .intro .x{margin-top:8px}
