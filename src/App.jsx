@@ -184,7 +184,17 @@ export default function App() {
   const [scores, setScores] = useState(DEFAULT_SCORES);
   const [history, setHistory] = useState([]);
   const [compareWith, setCompareWith] = useState(null); // { kind: "archetype" | "session", key: string } | null
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState({});
+  const [menuOpen, setMenuOpen] = useState(false);
+  // The radar needs a smaller radius on phones so the side labels fit.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 879px)");
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
   const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
@@ -259,60 +269,94 @@ export default function App() {
   const lastSession = history.length > 0 ? history[history.length - 1] : null;
   const overallTrend = lastSession ? avg - average(lastSession.scores) : null;
 
-  return (
-    <div style={{ minHeight: "100vh", background: "#000000", color: "#F693BF", fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `:root { --fs-display: clamp(28px, 4.4vw, 46px); --fs-stat: 40px; --fs-heading: 18px; --fs-subtitle: 16px; --fs-body: 14px; --fs-label: 11px; --ls-label: 0.08em; --ls-display: -0.01em; } * { box-sizing: border-box; } html, body { margin: 0; } .mono { font-family: 'Montserrat', system-ui, sans-serif; } .header-font { font-family: 'Bungee', system-ui, sans-serif; } .band-btn { transition: all 0.15s ease; cursor: pointer; } .band-btn:hover { transform: translateY(-1px); } ::selection { background: #F693BF; color: #000000; }`,
-        }}
-      />
+  const NAV = [
+    ["Home", "https://cakehurstryan.com/"],
+    ["Blog", "https://cakehurstryan.com/blog-posts/"],
+    ["Talks", "https://cakehurstryan.com/talks/"],
+    ["AI Readiness Radar", "https://radar.cakehurstryan.com/"],
+  ];
+  const CONTACT = [
+    ["LinkedIn", "https://www.linkedin.com/in/cakehurstryan/"],
+    ["Email", "mailto:cal@coada.org.uk"],
+    ["Subscribe", "https://cakehurstryan.com/#subscribe"],
+  ];
+  const compareValue = compareWith ? `${compareWith.kind}:${compareWith.key}` : "";
+  const onCompareChange = (e) => {
+    const v = e.target.value;
+    if (!v) return setCompareWith(null);
+    const i = v.indexOf(":");
+    setCompareWith({ kind: v.slice(0, i), key: v.slice(i + 1) });
+  };
+  const toggleLevels = (key) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  const trendMark = (d) => (d > 0 ? "▲" : d < 0 ? "▼" : "–");
 
-      {/* Site header — mirrors cakehurstryan.com */}
-      <header style={{ padding: "20px max(24px, 4vw)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-        <a href="https://cakehurstryan.com/" aria-label="Callum Akehurst-Ryan — home" style={{ display: "inline-flex" }}>
-          <img src="/avatar.png" alt="Callum Akehurst-Ryan" width={44} height={44} style={{ borderRadius: "50%", display: "block", border: "1px solid #3A2530" }} />
-        </a>
-        <nav className="mono" style={{ display: "flex", gap: 22, flexWrap: "wrap", fontSize: 14, fontWeight: 500, letterSpacing: "var(--ls-label)", textTransform: "uppercase" }}>
-          {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"]].map(([label, href]) => (
-            <a key={href} href={href} style={{ color: "#F693BF", textDecoration: "none" }}>{label}</a>
+  return (
+    <div className="page">
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+
+      {/* Header: same as Blog and Talks */}
+      <header className="hdr">
+        <h1 className="bungee title">AI Readiness Radar</h1>
+        <nav className="nav" aria-label="Main">
+          {NAV.map(([label, href]) => (
+            <a key={href} className="tl" href={href} aria-current={label === "AI Readiness Radar" ? "page" : undefined}>
+              {label}
+            </a>
           ))}
         </nav>
-      </header>
-
-      {/* Page title + tagline (radar-first: no image band) */}
-      <div style={{ padding: "24px max(24px, 4vw) 0" }}>
-        <h1 className="header-font" style={{ fontSize: "clamp(40px, 9vw, 70px)", fontWeight: 600, lineHeight: 1.0, margin: 0, letterSpacing: "normal", color: "#F693BF", textTransform: "uppercase" }}>
-          AI Readiness Radar
-        </h1>
-        <p style={{ fontSize: "var(--fs-subtitle)", fontWeight: 600, color: "#F693BF", margin: "18px 0 0", lineHeight: 1.3, maxWidth: 720, textTransform: "uppercase" }}>
-          AI won't fix a dysfunctional team… it'll expose it
-        </p>
-        <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "10px 0 0", maxWidth: 720, lineHeight: 1.6 }}>
-          Score your team honestly across five foundational signals before you hand engineers AI agents. Weak
-          foundations don't get fixed by faster tooling, they get amplified by it.
-        </p>
-      </div>
-
-      <main style={{ padding: "20px max(24px, 4vw) 27px", display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
-        {/* Chart + summary panel */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)",
-            gap: 32,
-            background: "#000000",
-            border: "1px solid #3A2530",
-            borderRadius: 0,
-            padding: 24,
-          }}
-          className="radar-grid"
+        <button
+          type="button"
+          className="ctl menu-btn"
+          aria-expanded={menuOpen}
+          aria-controls="menu"
+          aria-pressed={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
         >
-          <div>
-            <div style={{ height: 340 }}>
-              {mounted && (
+          Menu
+        </button>
+      </header>
+      {menuOpen && (
+        <div className="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="menu-top">
+            <button type="button" className="ctl" aria-pressed="true" onClick={() => setMenuOpen(false)}>
+              Menu
+            </button>
+          </div>
+          <nav aria-label="Main">
+            {NAV.map(([label, href]) => (
+              <a key={href} className="tl menu-link" href={href} aria-current={label === "AI Readiness Radar" ? "page" : undefined}>
+                {label}
+              </a>
+            ))}
+          </nav>
+          <div className="menu-contact">
+            {CONTACT.map(([label, href]) => (
+              <a key={href} className="tl" href={href}>
+                {label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <main>
+        {/* Intro: the title lockup pattern */}
+        <div className="intro">
+          <p className="h2">AI won’t fix a dysfunctional team… it’ll expose it</p>
+          <div className="rule" />
+          <p className="x">
+            Score your team honestly across five foundational signals before you hand engineers AI agents. Weak
+            foundations don’t get fixed by faster tooling, they get amplified by it.
+          </p>
+        </div>
+
+        {/* The tool: a black section, yellow on the chart only */}
+        <section className="tool" aria-label="Your reading">
+          <div className="chart">
+            {mounted && (
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={chartData} outerRadius="58%" margin={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <PolarGrid stroke="#F693BF" strokeOpacity={0.35} />
+                <RadarChart data={chartData} outerRadius={narrow ? "42%" : "74%"} margin={narrow ? { top: 8, bottom: 8, left: 0, right: 0 } : { top: 24, bottom: 24, left: 24, right: 24 }}>
+                  <PolarGrid stroke="#F693BF" strokeOpacity={0.5} />
                   <PolarAngleAxis
                     dataKey="signal"
                     tick={(props) => {
@@ -320,470 +364,300 @@ export default function App() {
                       const dx = x - cx;
                       const dy = y - cy;
                       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                      const offset = 14;
-                      const ox = x + (dx / dist) * offset;
-                      const oy = y + (dy / dist) * offset;
+                      const ox = x + (dx / dist) * 16;
+                      const oy = y + (dy / dist) * 16;
                       let anchor = "middle";
                       if (dx > 10) anchor = "start";
                       else if (dx < -10) anchor = "end";
-                      const value = String(payload.value);
-                      const words =
-                        value === "CONTEXT & UNDERSTANDING"
-                          ? ["CONTEXT &", "UNDERSTANDING"]
-                          : value.split(" ");
-                      const lineHeight = 13;
-                      const startDy = -((words.length - 1) * lineHeight) / 2;
+                      const words = String(payload.value).split(" ");
+                      const half = Math.ceil(words.length / 2);
+                      const lines = [words.slice(0, half).join(" "), words.slice(half).join(" ")].filter(Boolean);
+                      const lh = 15;
+                      const startDy = -((lines.length - 1) * lh) / 2;
                       return (
-                        <text
-                          x={ox}
-                          y={oy}
-                          textAnchor={anchor}
-                          dominantBaseline="middle"
-                          fill="#F693BF"
-                          fontSize={11}
-                          fontFamily="'Montserrat', system-ui, sans-serif"
-                        >
-                          {words.map((word, i) => (
-                            <tspan key={i} x={ox} dy={i === 0 ? startDy : lineHeight}>
-                              {word}
+                        <text x={ox} y={oy} textAnchor={anchor} dominantBaseline="middle" fill="#F693BF" fontSize={12} letterSpacing="0.06em" fontFamily="'Montserrat', system-ui, sans-serif">
+                          {lines.map((line, i) => (
+                            <tspan key={i} x={ox} dy={i === 0 ? startDy : lh}>
+                              {line}
                             </tspan>
                           ))}
                         </text>
                       );
                     }}
                   />
-                  <PolarRadiusAxis
-                    angle={90}
-                    domain={[0, 4]}
-                    tick={{ fill: "#F693BF", fontSize: 11 }}
-                    tickCount={5}
-                    axisLine={{ stroke: "#F693BF", strokeOpacity: 0.35 }}
-                  />
-                  <Radar
-                    name="You"
-                    dataKey="You"
-                    stroke="#E5FF3D"
-                    fill="#E5FF3D"
-                    fillOpacity={0.22}
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#E5FF3D" }}
-                  />
+                  <PolarRadiusAxis domain={[0, 4]} tickCount={5} tick={false} axisLine={false} />
                   {compareSeries && (
-                    <Radar
-                      name={compareSeries.label}
-                      dataKey="Compare"
-                      stroke={compareSeries.color}
-                      fill={compareSeries.color}
-                      fillOpacity={0.08}
-                      strokeWidth={1.5}
-                      strokeDasharray="4 3"
-                      dot={{ r: 2, fill: compareSeries.color }}
-                    />
+                    <Radar name={compareSeries.label} dataKey="Compare" stroke="#F693BF" fill="none" fillOpacity={0} strokeWidth={2} strokeDasharray="6 5" dot={false} isAnimationActive={false} />
                   )}
+                  <Radar name="You" dataKey="You" stroke="#E5FF3D" fill="#E5FF3D" fillOpacity={0.15} strokeWidth={3} dot={{ r: 5, fill: "#E5FF3D", stroke: "none" }} />
                 </RadarChart>
               </ResponsiveContainer>
-              )}
-            </div>
-            <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
-              <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
-                Compare to:
-              </span>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {ARCHETYPES.map((a) => {
-                const active = compareWith?.kind === "archetype" && compareWith.key === a.name;
-                return (
-                  <button
-                    key={a.name}
-                    onClick={() => setCompareWith(active ? null : { kind: "archetype", key: a.name })}
-                    className="mono band-btn"
-                    style={{
-                      fontSize: "var(--fs-label)",
-                      padding: "5px 10px",
-                      borderRadius: 0,
-                      border: `1px solid ${active ? "#FFFFFF" : "#3A2530"}`,
-                      background: active ? "rgba(255,255,255,0.12)" : "transparent",
-                      color: active ? "#FFFFFF" : "#F693BF",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {a.name}
-                  </button>
-                );
-              })}
-              </div>
-            </div>
-
-            {history.length > 0 ? (
-              <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
-                <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
-                  Past sessions:
-                </span>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                {[...history].reverse().map((h) => {
-                  const active = compareWith?.kind === "session" && compareWith.key === h.id;
-                  return (
-                    <div key={h.id} style={{ display: "flex" }}>
-                      <button
-                        onClick={() => setCompareWith(active ? null : { kind: "session", key: h.id })}
-                        className="mono band-btn"
-                        style={{
-                          fontSize: "var(--fs-label)",
-                          padding: "5px 10px",
-                          borderRadius: 0,
-                          borderStyle: "solid",
-                          borderWidth: "1px 0 1px 1px",
-                          borderColor: active ? "#FFFFFF" : "#3A2530",
-                          background: active ? "rgba(255,255,255,0.12)" : "transparent",
-                          color: active ? "#FFFFFF" : "#F693BF",
-                        }}
-                      >
-                        {formatSessionDate(h.date)} · {average(h.scores).toFixed(1)}
-                      </button>
-                      <button
-                        onClick={() => deleteSession(h.id)}
-                        className="mono"
-                        title="Delete this session"
-                        style={{
-                          fontSize: "var(--fs-label)",
-                          padding: "5px 8px",
-                          borderRadius: 0,
-                          border: `1px solid ${active ? "#FFFFFF" : "#3A2530"}`,
-                          background: "transparent",
-                          color: "#F693BF",
-                          cursor: "pointer",
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  );
-                })}
-                <button
-                  onClick={clearHistory}
-                  className="mono"
-                  style={{
-                    fontSize: "var(--fs-label)",
-                    background: "none",
-                    border: "none",
-                    color: "#F693BF",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    padding: 0,
-                    marginLeft: 4,
-                  }}
-                >
-                  Clear history
-                </button>
-                </div>
-              </div>
-            ) : (
-              <div className="compare-row" style={{ display: "flex", gap: 16, marginTop: 8 }}>
-                <span className="mono compare-label" style={{ fontSize: "var(--fs-label)", color: "#F693BF", flexShrink: 0, width: 110, paddingTop: 6 }}>
-                  Past sessions:
-                </span>
-                <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", opacity: 0.7, paddingTop: 6 }}>
-                  Save your first session to start tracking trends over time.
-                </div>
-              </div>
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", borderLeft: "1px solid #3A2530", paddingLeft: 32 }}>
-            <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
-              Overall reading
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginTop: 6 }}>
-              <div style={{ fontSize: "var(--fs-stat)", fontWeight: 700, color: band.color }}>
-                {avg.toFixed(1)}
-                <span style={{ fontSize: "var(--fs-heading)", color: "#F693BF", fontWeight: 500 }}> / 4</span>
-              </div>
-              <div
-                className="mono"
-                style={{ fontSize: "var(--fs-label)", color: band.color, textTransform: "uppercase", letterSpacing: "var(--ls-label)", border: `1px solid ${band.color}`, borderRadius: 0, padding: "3px 8px" }}
-              >
-                {band.label}
-              </div>
-            </div>
-            {lastSession && (
-              <div
-                className="mono"
-                style={{ fontSize: "var(--fs-label)", color: "#F693BF", opacity: overallTrend === 0 ? 0.6 : 1, marginTop: 8 }}
-              >
-                {overallTrend > 0 ? "▲" : overallTrend < 0 ? "▼" : "–"} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
-              </div>
-            )}
-            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", marginTop: 10, lineHeight: 1.5 }}>
-              {band.advice}
+          <div className="read">
+            <p className="d">Overall reading</p>
+            <p className="h2 reading">
+              {avg.toFixed(1)} / 4 · {band.label}
             </p>
-            <div style={{ marginTop: 16, padding: 12, background: "#000000", border: "1px solid #3A2530", borderRadius: 0 }}>
-              <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
-                Weakest signal
-              </div>
+            {lastSession && (
+              <p className="d trend">
+                {trendMark(overallTrend)} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
+              </p>
+            )}
+            <p className="x">{band.advice}</p>
+            <div className="weak">
+              <p className="d">Weakest signal</p>
               {allMax ? (
                 <>
-                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 4, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>N/A</div>
-                  <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
-                    Every signal is at maximum
-                  </div>
+                  <p className="t">None</p>
+                  <p className="d">Every signal is at High</p>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, marginTop: 4, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{weak.short}</div>
-                  <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", marginTop: 4 }}>
-                    {BAND_SHORT[scores[weak.key] - 1]} · this is the one to sort first
-                  </div>
+                  <p className="t">{weak.short}</p>
+                  <p className="d">{BAND_SHORT[scores[weak.key] - 1]} - this is the one to sort first</p>
                 </>
               )}
             </div>
-
-            {/* Compact selector — hidden on stacked/mobile in favour of the full cards below */}
-            <div className="adjust-scores">
-            <div className="mono" style={{ fontSize: "var(--fs-label)", color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", marginTop: 16, marginBottom: 4 }}>
-              Quick adjust
-            </div>
-            <div>
-              {SIGNALS.map((s) => (
-                <div key={s.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "5px 0", borderTop: "1px solid #241016" }}>
-                  <a href={`#signal-${s.key}`} title="Jump to guidance for this signal" style={{ fontSize: 12.5, fontWeight: 500, color: "#F693BF", lineHeight: 1.2, textDecoration: "none" }}>{s.short}</a>
-                  <div style={{ display: "flex", flexShrink: 0, border: "1px solid #3A2530" }}>
-                    {[1, 2, 3, 4].map((v, i) => {
-                      const active = scores[s.key] === v;
-                      return (
-                        <button
-                          key={v}
-                          onClick={() => setScores((prev) => ({ ...prev, [s.key]: v }))}
-                          className="mono"
-                          aria-label={`${s.short}: ${BAND_SHORT[v - 1]}`}
-                          title={BAND_SHORT[v - 1]}
-                          style={{ width: 26, height: 26, borderRadius: 0, cursor: "pointer", fontSize: "var(--fs-label)", border: "none", borderLeft: i > 0 ? "1px solid #3A2530" : "none", background: active ? "rgba(229,255,61,0.18)" : "transparent", color: active ? "#E5FF3D" : "#F693BF", fontWeight: active ? 600 : 400, transition: "background 0.12s ease" }}
-                        >
-                          {v}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-            </div>
-            <a href="#score" className="mono" style={{ display: "inline-block", marginTop: 14, fontSize: "var(--fs-label)", color: "#F693BF", textDecoration: "none" }}>
-              New here? Read what each level means below
-            </a>
           </div>
-        </section>
 
-        {/* Signal scoring */}
-        <section id="score" style={{ display: "flex", flexDirection: "column", gap: 16, scrollMarginTop: 16 }}>
-          <div className="score-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div>
-              <div style={{ fontSize: "var(--fs-heading)", fontWeight: 600, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>
-                Score each signal (full descriptions)
-              </div>
-            </div>
-            <div className="score-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span
-                className="mono"
-                style={{ fontSize: "var(--fs-label)", color: "#E5FF3D", opacity: justSaved ? 1 : 0, transition: "opacity 0.3s ease" }}
-              >
-                Saved in this browser
+          <div className="bar">
+            <div className="key">
+              <span className="d you">
+                <i aria-hidden="true" />
+                Your team
               </span>
-              <button
-                onClick={saveSession}
-                className="mono"
-                style={{
-                  fontSize: "var(--fs-label)",
-                  padding: "5px 10px",
-                  borderRadius: 0,
-                  border: "1px solid #F693BF",
-                  background: "#F693BF",
-                  color: "#000000",
-                  cursor: "pointer",
-                  textTransform: "uppercase",
-                }}
-              >
+              <label className="sel">
+                <span className="sel-label">
+                  <i className="dash" aria-hidden="true" />
+                  Compare
+                </span>
+                <select value={compareValue} onChange={onCompareChange}>
+                  <option value="">Nothing</option>
+                  <optgroup label="Team archetypes">
+                    {ARCHETYPES.map((a) => (
+                      <option key={a.name} value={`archetype:${a.name}`}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {history.length > 0 && (
+                    <optgroup label="Saved sessions">
+                      {[...history].reverse().map((h) => (
+                        <option key={h.id} value={`session:${h.id}`}>
+                          {formatSessionDate(h.date)} · {average(h.scores).toFixed(1)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </label>
+            </div>
+            <div className="actions">
+              <span className="d saved" role="status" aria-live="polite">
+                {justSaved ? "Saved in this browser" : ""}
+              </span>
+              {compareWith?.kind === "session" && (
+                <button type="button" className="ctl" onClick={() => deleteSession(compareWith.key)}>
+                  Delete session
+                </button>
+              )}
+              <button type="button" className="ctl" onClick={saveSession}>
                 Save session
               </button>
-              <button
-                onClick={resetScores}
-                className="mono"
-                style={{
-                  fontSize: "var(--fs-label)",
-                  padding: "5px 10px",
-                  borderRadius: 0,
-                  border: "1px solid #3A2530",
-                  background: "transparent",
-                  color: "#F693BF",
-                  cursor: "pointer",
-                  textTransform: "uppercase",
-                }}
-              >
+              <button type="button" className="ctl reset" onClick={resetScores}>
                 Reset scores
               </button>
             </div>
           </div>
-          {SIGNALS.map((s) => (
-            <div
-              key={s.key}
-              id={`signal-${s.key}`}
-              style={{
-                background: "#000000",
-                border: "1px solid #3A2530",
-                borderRadius: 0,
-                padding: 24,
-                scrollMarginTop: 16,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
-                <div>
-                  <h2 style={{ fontSize: "var(--fs-heading)", fontWeight: 600, margin: 0, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{s.short}</h2>
-                  <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", margin: "6px 0 0", maxWidth: 520, lineHeight: 1.5, textWrap: "pretty" }}>{s.question}</p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        </section>
+        <p className="d cap">
+          Read the full <a href="https://cakehurstryan.com/2026/06/12/ai-readiness-radar/">blog post about AI readiness</a>
+        </p>
+
+        {/* Score each signal */}
+        <section className="sig" id="score" aria-labelledby="score-h">
+          <h2 className="h2" id="score-h">
+            Score each signal
+          </h2>
+          <div className="rule" />
+          {SIGNALS.map((s) => {
+            const open = !!expanded[s.key];
+            const delta = lastSession ? scores[s.key] - lastSession.scores[s.key] : null;
+            return (
+              <div key={s.key} className="e" id={`signal-${s.key}`}>
+                <h3 className="t">
+                  {s.short}
                   {lastSession && (
-                    <div
-                      className="mono"
-                      title={`vs last session (${formatSessionDate(lastSession.date)})`}
-                      style={{
-                        fontSize: "var(--fs-label)",
-                        color: "#F693BF",
-                        opacity: scores[s.key] === lastSession.scores[s.key] ? 0.5 : 1,
-                      }}
-                    >
-                      {scores[s.key] > lastSession.scores[s.key] ? "▲" : scores[s.key] < lastSession.scores[s.key] ? "▼" : "–"}
-                    </div>
+                    <span className="d delta" title={`vs last session (${formatSessionDate(lastSession.date)})`}>
+                      {trendMark(delta)}
+                    </span>
                   )}
+                </h3>
+                <p className="x q" id={`q-${s.key}`}>
+                  {s.question}
+                </p>
+                <div className="levels" role="radiogroup" aria-labelledby={`q-${s.key}`}>
+                  {BAND_SHORT.map((label, i) => {
+                    const val = i + 1;
+                    const active = scores[s.key] === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        className={`ctl${active ? " on" : ""}`}
+                        onClick={() => setScores((prev) => ({ ...prev, [s.key]: val }))}
+                      >
+                        {val} {label}
+                      </button>
+                    );
+                  })}
                 </div>
+                <button type="button" className="conc" aria-expanded={open} aria-controls={`lv-${s.key}`} onClick={() => toggleLevels(s.key)}>
+                  <span className="d">Level descriptions</span>
+                  <svg className={`car${open ? " up" : ""}`} viewBox="0 0 16 16" aria-hidden="true">
+                    <polyline points="2,5 8,11 14,5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                </button>
+                {open && (
+                  <div className="descs" id={`lv-${s.key}`}>
+                    {s.bands.map((text, i) => (
+                      <div key={i}>
+                        <p className="d lvn">
+                          {i + 1} {BAND_SHORT[i]}
+                        </p>
+                        <p className="x">{text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 18 }}>
-                {BAND_SHORT.map((label, i) => {
-                  const val = i + 1;
-                  const active = scores[s.key] === val;
-                  return (
-                    <button
-                      key={val}
-                      onClick={() => setScores((prev) => ({ ...prev, [s.key]: val }))}
-                      className="band-btn"
-                      style={{
-                        padding: "10px 8px",
-                        borderRadius: 0,
-                        border: `1px solid ${active ? "#E5FF3D" : "#3A2530"}`,
-                        background: active ? "rgba(229,255,61,0.1)" : "#000000",
-                        color: active ? "#E5FF3D" : "#F693BF",
-                      }}
-                    >
-                      <div className="mono" style={{ fontSize: "var(--fs-label)", fontWeight: 600 }}>{val}</div>
-                      <div className="mono" style={{ fontSize: "var(--fs-label)", marginTop: 3, opacity: 0.85, textTransform: "uppercase", letterSpacing: "var(--ls-label)" }}>{label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setExpanded(expanded === s.key ? null : s.key)}
-                className="mono"
-                style={{
-                  marginTop: 12,
-                  background: "none",
-                  border: "none",
-                  color: "#F693BF",
-                  fontSize: "var(--fs-label)",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
-              >
-                {expanded === s.key ? "Hide band descriptions ↑" : "Show band descriptions ↓"}
-              </button>
-
-              {expanded === s.key && (
-                <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-                  {s.bands.map((bandText, i) => (
-                    <div key={i} className="band-desc-row" style={{ display: "flex", gap: 16, fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.5 }}>
-                      <span style={{ color: "#F693BF", flexShrink: 0, width: 230, fontWeight: 600 }}>{i + 1} · {BAND_LABELS[i]}</span>
-                      <span>{bandText}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </section>
 
-        {/* Positioning note */}
-        <div style={{ marginTop: 11 }}>
-          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
-            This radar sits underneath frameworks like DORA, TMMi, or Team Topologies… it's a conversation tool, not
-            a replacement for them. It tells you if your foundations can take the pace, not whether the AI you've
-            added is actually working. Run it as a team exercise: score individually, plot together, and go with the
-            lowest score where you disagree.
-          </p>
-          <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, maxWidth: 720, margin: "14px 0 0" }}>
-            Read the{" "}
-            <a href="https://cakehurstryan.com/2026/06/12/ai-readiness-radar/" style={{ color: "#F693BF", textDecoration: "underline" }}>
-              full write-up about using AI radars for engineering foundation assessment
-            </a>.
+        <div className="note">
+          <p className="x">
+            This radar sits underneath frameworks like DORA, TMMi, or Team Topologies… it’s a conversation tool, not a
+            replacement for them. It tells you if your foundations can take the pace, not whether the AI you’ve added is
+            actually working. Run it as a team exercise: score individually, plot together, and go with the lowest score
+            where you disagree.
           </p>
         </div>
       </main>
 
-      {/* Site footer — mirrors cakehurstryan.com */}
-      <footer style={{ borderTop: "3px solid #F693BF", marginTop: 8 }}>
-        <div className="footer-grid" style={{ padding: "40px max(24px, 4vw) 56px", display: "grid", gridTemplateColumns: "1.5fr 0.8fr 0.8fr", gap: 24 }}>
-          <div>
-            <div style={{ color: "#F693BF", fontSize: 16, fontWeight: 600, textTransform: "uppercase" }}>
-              Callum Akehurst-Ryan
-            </div>
-            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", lineHeight: 1.6, marginTop: 14, maxWidth: 460 }}>
-              I think quality is something that the whole team owns… not a gate that one person stands in front of.
-              I'm a Staff Quality Engineer who writes and speaks about testing, quality engineering and AI readiness
-              (with the odd gaming analogy thrown in).
-            </p>
-            <p style={{ fontSize: "var(--fs-body)", color: "#F693BF", fontStyle: "italic", marginTop: 16 }}>
-              © Callum Akehurst-Ryan 2026
-            </p>
-          </div>
-          <div style={{ border: "1px solid #F693BF", padding: 12 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
-              Contact
-            </div>
-            <a href="https://www.linkedin.com/in/cakehurstryan/" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-              LinkedIn
+      {/* Footer: same as cakehurstryan.com */}
+      <footer className="foot">
+        <p className="d">© Callum Akehurst-Ryan 2026</p>
+        <nav className="foot-links" aria-label="Contact">
+          {CONTACT.map(([label, href]) => (
+            <a key={href} className="tl" href={href}>
+              {label}
             </a>
-            <a href="mailto:cal@coada.org.uk" className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-              Email
-            </a>
-          </div>
-          <div style={{ border: "1px solid #F693BF", padding: 12 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, color: "#F693BF", textTransform: "uppercase", marginBottom: 12, textAlign: "right" }}>
-              Pages
-            </div>
-            {[["Home", "https://cakehurstryan.com/"], ["About me", "https://cakehurstryan.com/about-me/"], ["Blog posts", "https://cakehurstryan.com/blog-posts/"], ["Talks", "https://cakehurstryan.com/talks/"], ["AI Readiness Radar", "https://radar.cakehurstryan.com/"]].map(([label, href]) => (
-              <a key={href} href={href} className="mono" style={{ display: "block", fontSize: 14, fontWeight: 400, color: "#F693BF", textTransform: "uppercase", letterSpacing: "var(--ls-label)", textDecoration: "none", padding: "5px 0" }}>
-                {label}
-              </a>
-            ))}
-          </div>
-        </div>
+          ))}
+        </nav>
       </footer>
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @media (max-width: 760px) {
-          .radar-grid { grid-template-columns: 1fr !important; }
-          .radar-grid > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid #3A2530; padding-top: 24px; margin-top: 8px; }
-          .band-desc-row { flex-direction: column !important; gap: 2px !important; }
-          .band-desc-row > span:first-child { width: auto !important; }
-          .compare-row { flex-direction: column !important; gap: 6px !important; }
-          .compare-label { width: auto !important; padding-top: 0 !important; }
-          .footer-grid { grid-template-columns: 1fr !important; }
-          .adjust-scores { display: none !important; }
-          .score-header { flex-direction: column-reverse !important; align-items: flex-start !important; }
-          .score-actions { align-self: flex-end !important; }
-        }
-      `,
-        }}
-      />
     </div>
   );
 }
+
+const CSS = `
+:root{--pink:#F693BF;--black:#000;--y:#E5FF3D;--gut:48px;--sec:48px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--pink)}
+::selection{background:#000;color:var(--pink)}
+.page{min-height:100vh;background:var(--pink);color:#000;font-family:'Montserrat',system-ui,sans-serif}
+.page p,.page h1,.page h2,.page h3{margin:0}
+.page a{color:inherit}
+.page :focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.bungee{font-family:'Bungee',system-ui,sans-serif;font-weight:400;line-height:.84;margin:0 0 0 -.058em;text-transform:uppercase}
+.h2{font-weight:700;font-size:28px;line-height:1.1;letter-spacing:.04em;text-transform:uppercase}
+.t{font-size:20px;font-weight:600;line-height:1.2}
+.x{font-size:16px;line-height:1.5}
+.d{font-size:12px;letter-spacing:.06em;text-transform:uppercase;line-height:1.35}
+.tl{font-size:16px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.tl:hover,.tl:focus-visible,.tl[aria-current]{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
+.ctl{font-family:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:0;height:48px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.ctl.on,.ctl[aria-pressed="true"]{background:#000;color:var(--pink);border-color:#000}
+.rule{border-top:1px solid currentColor;margin-top:8px}
+
+.hdr{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:24px var(--gut)}
+.title{font-size:56px}
+.nav{display:flex;gap:32px}
+.menu-btn{display:none}
+.menu{position:fixed;inset:0;z-index:10;background:var(--pink);color:#000;padding:16px var(--gut) 32px;display:flex;flex-direction:column;overflow:auto}
+.menu-top{display:flex;justify-content:flex-end}
+.menu nav{display:flex;flex-direction:column;margin-top:24px}
+.menu-link{font-size:28px;min-height:56px}
+.menu-contact{margin-top:auto;display:flex;flex-direction:column;padding-top:32px}
+
+.intro{padding:24px var(--gut) 0;max-width:calc(720px + 2 * var(--gut))}
+.intro .x{margin-top:8px}
+
+.tool{margin-top:var(--sec);background:#000;color:var(--pink);padding:var(--sec) var(--gut);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:center}
+.chart{height:520px}
+.read .reading{margin-top:8px}
+.read .trend{margin-top:8px}
+.read .x{margin-top:8px}
+.weak{margin-top:24px;padding:24px 0;border-top:1px solid var(--pink);border-bottom:1px solid var(--pink)}
+.weak .t{margin:8px 0}
+.bar{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:center;margin-top:24px}
+.key{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.you i{display:inline-block;width:24px;border-top:3px solid var(--y);vertical-align:middle;margin-right:8px}
+.sel{display:flex;height:48px;border:1px solid currentColor;flex:0 1 380px;min-width:0}
+.sel-label{display:flex;align-items:center;padding:0 16px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-right:1px solid currentColor;white-space:nowrap}
+.sel-label .dash{display:inline-block;width:20px;border-top:2px dashed var(--pink);margin-right:8px}
+.sel select{flex:1;min-width:0;appearance:none;-webkit-appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpolyline points='2,5 8,11 14,5' fill='none' stroke='%23F693BF' stroke-width='1.5'/%3E%3C/svg%3E") right 16px center/16px no-repeat;color:inherit;border:0;border-radius:0;font:inherit;font-size:16px;padding:0 44px 0 16px;cursor:pointer}
+.sel select option,.sel select optgroup{background:#000;color:var(--pink)}
+.actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+.actions .reset{margin-left:16px}
+.saved{margin-right:8px}
+.cap{padding:8px var(--gut) 0;text-align:right}
+.cap a{text-decoration:underline;text-underline-offset:3px}
+
+.sig{padding:var(--sec) var(--gut) 0}
+.e{padding:24px 0;border-bottom:1px solid #000}
+.e:last-of-type{border-bottom:0}
+.e .delta{margin-left:12px;vertical-align:middle}
+.e .q{margin-top:8px}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.levels .ctl{width:100%}
+.conc{margin-top:8px;display:inline-flex;gap:8px;align-items:center;min-height:44px;padding:0;background:none;border:0;color:inherit;font-family:inherit;cursor:pointer}
+.car{width:16px;height:16px;transition:transform .15s ease}
+.car.up{transform:rotate(180deg)}
+.descs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.descs .lvn{display:none}
+
+.note{padding:var(--sec) var(--gut) 0;max-width:calc(720px + 2 * var(--gut))}
+.foot{margin-top:var(--sec);border-top:1px solid #000;padding:24px var(--gut) 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.foot-links{display:flex;gap:32px}
+
+@media (max-width: 879px){
+  :root{--gut:16px;--sec:40px}
+  .hdr{padding:16px var(--gut)}
+  .nav{display:none}
+  .menu-btn{display:inline-flex}
+  .title{font-size:32px}
+  .h2{font-size:20px}
+  .menu-link{font-size:28px}
+  .tool{display:flex;flex-direction:column;align-items:stretch}
+  .chart{height:300px;order:1;margin:0 calc(-1 * var(--gut))}
+  .bar{display:contents}
+  .key{order:2;flex-direction:column;align-items:stretch;gap:16px;margin-top:16px}
+  .sel{flex:none}
+  .read{order:3;margin-top:32px}
+  .actions{order:4;margin-top:24px;justify-content:flex-start}
+  .saved{order:3;flex-basis:100%;margin:8px 0 0}
+  .levels{grid-template-columns:1fr 1fr}
+  .descs{grid-template-columns:1fr;gap:16px}
+  .descs .lvn{display:block;font-weight:700;margin-bottom:4px}
+  .foot{flex-direction:column-reverse;align-items:stretch;padding-top:0}
+  .foot-links{flex-direction:column;gap:0}
+  .foot-links .tl{min-height:56px;border-bottom:1px solid #000}
+  .foot .d{padding-top:24px}
+}
+`;
