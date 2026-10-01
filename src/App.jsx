@@ -186,14 +186,15 @@ export default function App() {
   const [compareWith, setCompareWith] = useState(null); // { kind: "archetype" | "session", key: string } | null
   const [expanded, setExpanded] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
-  // The radar needs a smaller radius on phones so the side labels fit.
-  const [narrow, setNarrow] = useState(false);
+  // Size the radar from its container so the labels always have room.
+  const chartRef = React.useRef(null);
+  const [chartW, setChartW] = useState(0);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 879px)");
-    const update = () => setNarrow(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    const el = chartRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setChartW(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
   const [justSaved, setJustSaved] = useState(false);
 
@@ -288,7 +289,9 @@ export default function App() {
     setCompareWith({ kind: v.slice(0, i), key: v.slice(i + 1) });
   };
   const toggleLevels = (key) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
-  const trendMark = (d) => (d > 0 ? "▲" : d < 0 ? "▼" : "–");
+  const trendMark = (d) => (d > 0 ? "▲" : d < 0 ? "▼" : "");
+  const radius = Math.max(40, Math.min(chartW / 2 - 112, 220));
+  const roundedTrend = overallTrend === null ? null : Math.round(overallTrend * 10) / 10;
 
   return (
     <div className="page">
@@ -352,10 +355,10 @@ export default function App() {
 
         {/* The tool: a black section, yellow on the chart only */}
         <section className="tool" aria-label="Your reading">
-          <div className="chart">
-            {mounted && (
+          <div className="chart" ref={chartRef} style={{ height: radius * 2 + 100 }}>
+            {mounted && chartW > 0 && (
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={chartData} outerRadius={narrow ? "42%" : "74%"} margin={narrow ? { top: 8, bottom: 8, left: 0, right: 0 } : { top: 24, bottom: 24, left: 24, right: 24 }}>
+                <RadarChart data={chartData} outerRadius={radius} margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
                   <PolarGrid stroke="#F693BF" strokeOpacity={0.5} />
                   <PolarAngleAxis
                     dataKey="signal"
@@ -400,11 +403,13 @@ export default function App() {
             <p className="h2 reading">
               {avg.toFixed(1)} / 4 · {band.label}
             </p>
-            {lastSession && (
-              <p className="d trend">
-                {trendMark(overallTrend)} {Math.abs(overallTrend).toFixed(1)} vs last session ({formatSessionDate(lastSession.date)})
-              </p>
-            )}
+            <p className="d trend">
+              {lastSession
+                ? roundedTrend === 0
+                  ? `No change vs last session (${formatSessionDate(lastSession.date)})`
+                  : `${trendMark(roundedTrend)} ${Math.abs(roundedTrend).toFixed(1)} vs last session (${formatSessionDate(lastSession.date)})`
+                : "\u00a0"}
+            </p>
             <p className="x">{band.advice}</p>
             <div className="weak">
               <p className="d">Weakest signal</p>
@@ -489,7 +494,7 @@ export default function App() {
               <div key={s.key} className="e" id={`signal-${s.key}`}>
                 <h3 className="t">
                   {s.short}
-                  {lastSession && (
+                  {lastSession && delta !== 0 && (
                     <span className="d delta" title={`vs last session (${formatSessionDate(lastSession.date)})`}>
                       {trendMark(delta)}
                     </span>
@@ -587,7 +592,7 @@ body{background:var(--pink)}
 
 .hdr{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:24px var(--gut)}
 .title{font-size:56px}
-.nav{display:flex;gap:32px}
+.nav{display:flex;gap:32px;white-space:nowrap}
 .menu-btn{display:none}
 .menu{position:fixed;inset:0;z-index:10;background:var(--pink);color:#000;padding:16px var(--gut) 32px;display:flex;flex-direction:column;overflow:auto}
 .menu-top{display:flex;justify-content:flex-end}
@@ -598,8 +603,8 @@ body{background:var(--pink)}
 .intro{padding:24px var(--gut) 0;max-width:calc(720px + 2 * var(--gut))}
 .intro .x{margin-top:8px}
 
-.tool{margin-top:var(--sec);background:#000;color:var(--pink);padding:var(--sec) var(--gut);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:center}
-.chart{height:520px}
+.tool{margin-top:var(--sec);background:#000;color:var(--pink);padding:24px var(--gut);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:center}
+.chart{min-width:0}
 .read .reading{margin-top:8px}
 .read .trend{margin-top:8px}
 .read .x{margin-top:8px}
@@ -632,26 +637,31 @@ body{background:var(--pink)}
 .descs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
 .descs .lvn{display:none}
 
-.note{padding:var(--sec) var(--gut) 0;max-width:calc(720px + 2 * var(--gut))}
+.note{padding:var(--sec) var(--gut) 0}
 .foot{margin-top:var(--sec);border-top:1px solid #000;padding:24px var(--gut) 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
 .foot-links{display:flex;gap:32px}
 
+@media (max-width: 1399px){
+  .nav{display:none}
+  .menu-btn{display:inline-flex}
+}
+@media (max-width: 1023px){
+  .tool{display:flex;flex-direction:column;align-items:stretch}
+  .chart{order:1}
+  .bar{display:contents}
+  .key{order:2;margin-top:16px}
+  .read{order:3;margin-top:32px}
+  .actions{order:4;margin-top:24px;justify-content:flex-start}
+  .saved{order:3;flex-basis:100%;margin:8px 0 0;min-height:16px}
+}
 @media (max-width: 879px){
   :root{--gut:16px;--sec:40px}
   .hdr{padding:16px var(--gut)}
-  .nav{display:none}
-  .menu-btn{display:inline-flex}
   .title{font-size:32px}
   .h2{font-size:20px}
   .menu-link{font-size:28px}
-  .tool{display:flex;flex-direction:column;align-items:stretch}
-  .chart{height:300px;order:1;margin:0 calc(-1 * var(--gut))}
-  .bar{display:contents}
-  .key{order:2;flex-direction:column;align-items:stretch;gap:16px;margin-top:16px}
+  .key{flex-direction:column;align-items:stretch;gap:16px}
   .sel{flex:none}
-  .read{order:3;margin-top:32px}
-  .actions{order:4;margin-top:24px;justify-content:flex-start}
-  .saved{order:3;flex-basis:100%;margin:8px 0 0}
   .levels{grid-template-columns:1fr 1fr}
   .descs{grid-template-columns:1fr;gap:16px}
   .descs .lvn{display:block;font-weight:700;margin-bottom:4px}
