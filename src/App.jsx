@@ -556,7 +556,6 @@ export default function App() {
 
       {/* Footer: same as cakehurstryan.com */}
       <footer className="foot">
-        <p className="d">© Callum Akehurst-Ryan 2026</p>
         <nav className="foot-links" aria-label="Contact">
           {CONTACT.map(([label, href]) => (
             <a key={href} className="tl" href={href}>
@@ -564,6 +563,7 @@ export default function App() {
             </a>
           ))}
         </nav>
+        <p className="d">© Callum Akehurst-Ryan 2026</p>
       </footer>
     </div>
   );
@@ -638,8 +638,8 @@ body{background:var(--pink)}
 .descs .lvn{display:none}
 
 .note{padding:var(--sec) var(--gut) 0}
-.foot{margin-top:var(--sec);border-top:1px solid #000;padding:24px var(--gut) 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
-.foot-links{display:flex;gap:32px}
+.foot{margin-top:var(--sec);border-top:1px solid #000;padding:32px var(--gut) 48px;display:flex;flex-direction:column;align-items:flex-end;gap:24px;text-align:right}
+.foot-links{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 32px}
 
 @media (max-width: 1399px){
   .nav{display:none}
@@ -665,9 +665,7 @@ body{background:var(--pink)}
   .levels{grid-template-columns:1fr 1fr}
   .descs{grid-template-columns:1fr;gap:16px}
   .descs .lvn{display:block;font-weight:700;margin-bottom:4px}
-  .foot{flex-direction:column-reverse;align-items:stretch;padding-top:0}
-  .foot-links{flex-direction:column;gap:0}
-  .foot-links .tl{min-height:56px;border-bottom:1px solid #000}
-  .foot .d{padding-top:24px}
+  .foot{padding:24px var(--gut) 40px}
+  .foot-links{column-gap:24px}
 }
 `;
